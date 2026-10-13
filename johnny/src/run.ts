@@ -57,7 +57,7 @@ const allowed = decision.options.filter((o) => checkPlan(o.files_to_change).ok);
 const results: OptionResult[] = await Promise.all(allowed.map(async (o) => {
   try {
     const r = await implementOption(decision, o);
-    lap(`act ${o.id}: ${r.ok ? `committed ${r.sha} on ${r.branch}` : "checks failed, not committed"}`);
+    lap(`act ${o.id}: ${r.ok ? `committed ${r.sha} on ${r.branch}${r.deviations.length ? `; outside the plan: ${r.deviations.join(", ")}` : ""}` : "checks failed, not committed"}`);
     return r;
   } catch (e) {
     lap(`act ${o.id}: failed (${(e as Error).message})`);

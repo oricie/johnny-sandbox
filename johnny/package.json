@@ -5,7 +5,8 @@
   "scripts": {
     "observe": "tsx src/observe/cli.ts",
     "run": "tsx src/run.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval": "tsx src/eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",

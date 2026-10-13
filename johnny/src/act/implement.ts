@@ -77,7 +77,10 @@ export async function implementOption(decision: Decision, option: Option) {
   }
   if (!checks.ok) return { option: option.id, branch, dir, ok: false as const, summary: edit.summary, checks: checks.output };
 
+  const files = edit.files.map((f) => f.path);
+  // Allowed by constraints but not in the option's own plan: reported, not blocked.
+  const deviations = files.filter((f) => !option.files_to_change.includes(f));
   const sha = commitAll(dir, `Johnny: option ${option.id}, ${option.name}\n\n${edit.summary}`);
   return { option: option.id, branch, dir, ok: true as const, sha, summary: edit.summary, checks: checks.output,
-    files: edit.files.map((f) => f.path) };
+    files, deviations };
 }

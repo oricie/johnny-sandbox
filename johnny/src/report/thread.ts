@@ -9,6 +9,7 @@ export interface OptionResult {
   summary: string;
   checks: string;
   files?: string[];
+  deviations?: string[]; // changed files that were not in the option's plan
   shot?: string; // png path
 }
 
@@ -35,6 +36,7 @@ export function buildThreadPage(d: Decision, results: OptionResult[], beforeShot
       <div class="meta">${r ? (r.ok
         ? `✅ ${esc(r.checks)} · branch <code>${esc(r.branch)}</code> @ <code>${r.sha}</code> · ${(r.files ?? []).map((f) => `<code>${esc(f.replace("demo-app/src/", ""))}</code>`).join(" ")}`
         : `❌ Checks failed, not committed<pre>${esc(r.checks)}</pre>`) : "Not implemented"}</div>
+      ${r?.deviations?.length ? `<div class="box">⚠️ Outside the plan: ${r.deviations.map((f) => `<code>${esc(f.replace("demo-app/src/", ""))}</code>`).join(" ")}</div>` : ""}
     </div>`;
   };
 

@@ -1,12 +1,17 @@
 {
   "name": "johnny-sandbox",
   "private": true,
-  "workspaces": ["demo-app", "demo-api", "johnny"],
+  "workspaces": [
+    "demo-app",
+    "demo-api",
+    "johnny"
+  ],
   "scripts": {
     "app": "npm run dev -w demo-app",
     "api": "npm run start -w demo-api",
     "observe": "npm run observe -w johnny",
     "johnny": "npm run run -w johnny --",
-    "typecheck": "npm run typecheck -w demo-app && npm run typecheck -w johnny"
+    "typecheck": "npm run typecheck -w demo-app && npm run typecheck -w johnny",
+    "eval": "npm run eval -w johnny --"
   }
 }
