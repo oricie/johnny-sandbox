@@ -107,10 +107,11 @@ function readSources(packs: EvidencePack[]) {
 }
 
 export async function decide(packs: EvidencePack[]): Promise<Decision> {
-  // In a cloud session the key can be a network secret that the proxy adds as the
-  // x-api-key header, so the process itself never sees it. The SDK still wants a
-  // value, so pass a placeholder that the proxy's header replaces.
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? "set-by-network-secret" });
+  // Claude Code cloud environments reserve ANTHROPIC_API_KEY for their own login and
+  // don't pass it to sessions, so the demo reads JOHNNY_ANTHROPIC_KEY first.
+  const apiKey = process.env.JOHNNY_ANTHROPIC_KEY ?? process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("Set JOHNNY_ANTHROPIC_KEY (or ANTHROPIC_API_KEY) to run the decide step");
+  const client = new Anthropic({ apiKey });
   const response = await client.beta.messages.create({
     model: MODEL,
     max_tokens: 16000,

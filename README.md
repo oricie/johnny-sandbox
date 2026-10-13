@@ -44,10 +44,10 @@ slack     (next) Bolt app in Socket Mode posting the payload and handling button
 ```bash
 npm install
 npm run observe                 # print the graph and evidence packs
-ANTHROPIC_API_KEY=... npm run johnny   # full observe -> decide -> guard -> report
+JOHNNY_ANTHROPIC_KEY=... npm run johnny   # full observe -> decide -> guard -> report
 npm run api & npm run app       # see the product at http://localhost:5173
 ```
 
-The key can be an `ANTHROPIC_API_KEY` environment variable, or (in a Claude Code cloud
-environment) a network secret for `api.anthropic.com` that sends the `x-api-key` header.
+Set the key as `JOHNNY_ANTHROPIC_KEY` (or `ANTHROPIC_API_KEY` outside Claude Code cloud
+environments, which reserve that name for their own login).
 `npm run johnny -- --observe-only` stops after observe.
