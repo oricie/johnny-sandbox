@@ -34,8 +34,10 @@ evidence  one pack per screen joining the four layers           -> out/evidence.
 decide    Claude, structured JSON: findings, two options, recommendation  -> out/decision.json
 guard     options checked against constraints.json; citations checked to exist
 report    Slack Block Kit payload with Approve A / Approve B / Request changes  -> out/slack-message.json
-act       (next) git worktree per option, apply edits, build
-verify    (next) Playwright screenshots before / A / B, run checks
+act       --act: per option, a git worktree on johnny/option-<id>; Claude writes the files,
+          constraints are re-checked, typecheck + build run (one repair round), then commit
+verify    each branch is built and served; Playwright screenshots the chosen screen, before / A / B
+thread    out/thread.html: a Slack-style thread with evidence, screenshots and Approve buttons (page only)
 slack     (next) Bolt app in Socket Mode posting the payload and handling buttons
 ```
 
@@ -44,6 +46,7 @@ slack     (next) Bolt app in Socket Mode posting the payload and handling button
 ```bash
 npm install
 npm run observe                 # print the graph and evidence packs
+npm run johnny -- --decision fixtures/decision-run3.json --act   # build both options from a saved decision
 JOHNNY_ANTHROPIC_KEY=... npm run johnny   # full observe -> decide -> guard -> report
 npm run api & npm run app       # see the product at http://localhost:5173
 ```

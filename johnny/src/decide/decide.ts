@@ -1,10 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import Anthropic from "@anthropic-ai/sdk";
+import { structured } from "../llm";
 import { ROOT } from "../paths";
 import type { EvidencePack } from "../types";
-
-export const MODEL = "claude-opus-5-5";
 
 export interface Decision {
   findings: {
@@ -107,26 +105,9 @@ function readSources(packs: EvidencePack[]) {
 }
 
 export async function decide(packs: EvidencePack[]): Promise<Decision> {
-  // Claude Code cloud environments reserve ANTHROPIC_API_KEY for their own login and
-  // don't pass it to sessions, so the demo reads JOHNNY_ANTHROPIC_KEY first.
-  const apiKey = process.env.JOHNNY_ANTHROPIC_KEY ?? process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("Set JOHNNY_ANTHROPIC_KEY (or ANTHROPIC_API_KEY) to run the decide step");
-  const client = new Anthropic({ apiKey });
-  const response = await client.beta.messages.create({
-    model: MODEL,
-    max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    system: SYSTEM,
-    output_config: { effort: "high", format: { type: "json_schema", schema: SCHEMA } },
-    messages: [{
-      role: "user",
-      content: `Evidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}`,
-    }],
-  });
-
-  if (response.stop_reason === "refusal") throw new Error("Model declined the request");
-  const text = response.content.find((b) => b.type === "text");
-  if (!text || text.type !== "text") throw new Error(`No text in response (stop_reason=${response.stop_reason})`);
-  return JSON.parse(text.text) as Decision;
+  return structured<Decision>(
+    SYSTEM,
+    `Evidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}`,
+    SCHEMA,
+  );
 }
