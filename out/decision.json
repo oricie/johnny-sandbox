@@ -1,0 +1,230 @@
+{
+  "findings": [
+    {
+      "title": "Critical alerts on crown-jewel assets are buried under duplicate low-severity noise in the alert queue",
+      "screen": "/alerts",
+      "impact": "high",
+      "evidence": [
+        {
+          "claim": "Median time to open a critical alert is 1260s against a 300s target, more than four times over.",
+          "source": "analytics.json#screens[\"/alerts\"].events.time_to_open_critical_s"
+        },
+        {
+          "claim": "The quarter's success metric is mean time to triage for critical alerts on crown-jewel assets, with a target under 5 minutes.",
+          "source": "product.md"
+        },
+        {
+          "claim": "Analysts scroll a median of 46 rows before reaching a critical alert.",
+          "source": "analytics.json#screens[\"/alerts\"].events.scroll_depth_before_critical"
+        },
+        {
+          "claim": "Analysts open a median of 38 alerts per session, and 64% of opened alerts are closed as duplicates within 20s.",
+          "source": "analytics.json#screens[\"/alerts\"].events.open_alert"
+        },
+        {
+          "claim": "The 64% duplicate-close rate comes from the duplicate-close event.",
+          "source": "analytics.json#screens[\"/alerts\"].events.close_within_20s_as_duplicate"
+        },
+        {
+          "claim": "Analysts spend a median of 2010s on the queue, versus 640s for incident leads.",
+          "source": "analytics.json#screens[\"/alerts\"].by_role"
+        },
+        {
+          "claim": "An analyst reports opening 40 alerts to find the 3 that matter, and says half are the same PowerShell alert on a test box.",
+          "source": "analytics.json#feedback[0]"
+        },
+        {
+          "claim": "An incident lead reports that the DC credential dump sat in the queue for 20 minutes under low-severity noise.",
+          "source": "analytics.json#feedback[1]"
+        },
+        {
+          "claim": "AlertList sorts only by detectedAt (newest first), so severity and asset have no effect on order.",
+          "source": "demo-app/src/components/AlertList.tsx:9"
+        },
+        {
+          "claim": "AlertList shows severity as plain text, not as a Badge with severity tokens, and has no asset column at all.",
+          "source": "demo-app/src/components/AlertList.tsx:11-18"
+        },
+        {
+          "claim": "The API already returns asset, assetCriticality (crown-jewel/production/internal/test) and fingerprint for each alert, and the same ps-enc:test-runner-04 fingerprint repeats 5 times.",
+          "source": "demo-api/src/server.js"
+        },
+        {
+          "claim": "The primary persona judges urgency by severity and by what the affected asset is, and needs to spot danger without opening every alert.",
+          "source": "personas.md"
+        }
+      ],
+      "action": "fix_now",
+      "reason": "This hits the primary persona, the core job (triage), and the quarter's success metric directly. The queue's order ignores the two attributes analysts use to judge urgency, and the data needed to fix it is already in the API response."
+    },
+    {
+      "title": "Analysts click the disabled 'Isolate host' button",
+      "screen": "/incident",
+      "impact": "low",
+      "evidence": [
+        {
+          "claim": "There were 780 clicks on the disabled isolate button: 760 by analysts, 20 by viewers and 0 by incident leads.",
+          "source": "analytics.json#screens[\"/incident\"].events.click_disabled_isolate"
+        },
+        {
+          "claim": "An analyst asks why they can't isolate the host themselves.",
+          "source": "analytics.json#feedback[2]"
+        },
+        {
+          "claim": "Only incident leads may run containment, after a 2025 outage. Product rule: do not enable the button for analysts, do not hide the restriction, and do not bypass the API check.",
+          "source": "decisions.md#D-12"
+        },
+        {
+          "claim": "The API enforces the incident_lead role.",
+          "source": "demo-api/src/rules/containment.js"
+        }
+      ],
+      "action": "do_not_change",
+      "reason": "This friction is deliberate under decisions.md#D-12. Enabling containment for analysts or removing the restriction is out of bounds."
+    },
+    {
+      "title": "The containment restriction is explained only in a hover tooltip",
+      "screen": "/incident",
+      "impact": "low",
+      "evidence": [
+        {
+          "claim": "The reason the button is disabled exists only in a native title attribute, which is not visible by default and not reliably exposed on touch or to keyboard users.",
+          "source": "demo-app/src/screens/IncidentResponse.tsx:27"
+        },
+        {
+          "claim": "Repeated clicks on the disabled button suggest analysts don't see why it is disabled or what to do next.",
+          "source": "analytics.json#screens[\"/incident\"].events.click_disabled_isolate"
+        },
+        {
+          "claim": "The restriction must stay visible and must not be hidden.",
+          "source": "decisions.md#D-12"
+        }
+      ],
+      "action": "later",
+      "reason": "Showing visible inline text (for example, 'Requires an incident lead; escalate to request isolation') is consistent with D-12 and could cut wasted clicks. It does not move the quarter's metric, so it can wait."
+    },
+    {
+      "title": "PageHeader subtitle colour fails contrast and is hardcoded",
+      "screen": "/overview",
+      "impact": "medium",
+      "evidence": [
+        {
+          "claim": "The subtitle uses a hardcoded #b8bcc4, about 1.9:1 against the light background, well below the 4.5:1 AA requirement.",
+          "source": "demo-app/src/components/PageHeader.tsx:5"
+        },
+        {
+          "claim": "The design system requires token colours only (no hex in components) and AA contrast of 4.5:1. A --color-text-muted token exists.",
+          "source": "design-system.md"
+        },
+        {
+          "claim": "The muted text token is --color-text-muted: #5b6270.",
+          "source": "demo-app/src/styles/tokens.css"
+        },
+        {
+          "claim": "A viewer reports the grey subtitle is hard to read on a laptop.",
+          "source": "analytics.json#feedback[3]"
+        },
+        {
+          "claim": "The overview has a 22% exit rate, although that rate is not clearly attributable to this issue.",
+          "source": "analytics.json#screens[\"/overview\"]"
+        }
+      ],
+      "action": "later",
+      "reason": "This is a real accessibility violation affecting every screen that uses PageHeader. It is a one-line token swap, but it affects reading comfort rather than the core triage job, so it ranks below the queue problem."
+    },
+    {
+      "title": "Severity badges carry no severity styling",
+      "screen": "/overview",
+      "impact": "low",
+      "evidence": [
+        {
+          "claim": "Badge renders a single neutral style regardless of severity.",
+          "source": "demo-app/src/components/Badge.tsx"
+        },
+        {
+          "claim": "Severity should use the --color-sev-* tokens alongside the severity word.",
+          "source": "design-system.md"
+        },
+        {
+          "claim": "The --color-sev-critical/high/medium/low tokens exist but are unused.",
+          "source": "demo-app/src/styles/tokens.css"
+        }
+      ],
+      "action": "later",
+      "reason": "This weakens how fast severity can be scanned on the overview. The fix can be folded into the alert-queue work, which also needs severity badges."
+    }
+  ],
+  "chosen_finding": "Critical alerts on crown-jewel assets are buried under duplicate low-severity noise in the alert queue",
+  "options": [
+    {
+      "id": "A",
+      "name": "Risk-ranked queue",
+      "approach": "Change the queue's order so that it reflects urgency instead of arrival time. AlertList sorts by severity rank, then assetCriticality rank (crown-jewel > production > internal > test), then detectedAt descending. An Asset column shows asset name plus criticality. Severity renders as a Badge with a severity variant built on the --color-sev-* tokens, keeping the severity word visible. Critical rows on crown-jewel assets get the --color-sev-critical-bg background. Every alert remains a row, so nothing is hidden or closed.",
+      "files_to_change": [
+        "demo-app/src/components/AlertList.tsx",
+        "demo-app/src/components/Badge.tsx",
+        "demo-app/src/styles/tokens.css"
+      ],
+      "pros": [
+        "Targets the quarter's metric directly: critical crown-jewel alerts land in row 1 whatever the noise volume.",
+        "Matches how the primary persona judges urgency: severity plus asset.",
+        "Every raw alert stays visible as its own row, fully compliant with D-07.",
+        "Uses the existing Table, Badge and sev tokens, so the change is small and contained."
+      ],
+      "cons": [
+        "Duplicate noise is still present lower in the list, so the 64% duplicate-close rate will improve only indirectly.",
+        "Relies on the Alert type in protected demo-app/src/api/types.ts exposing asset and assetCriticality. The API returns them, but the type cannot be edited if it lacks them.",
+        "Analysts used to strict chronological order may need a visible sort indicator."
+      ],
+      "risk": "low"
+    },
+    {
+      "id": "B",
+      "name": "Collapse duplicates by fingerprint",
+      "approach": "Reduce noise volume instead of reordering. AlertList groups alerts sharing a fingerprint into one summary row showing title, asset, a count (for example, '×5') and latest time. The row is styled with --color-row-muted and can be expanded to list every underlying raw alert. AlertQueue's subtitle reports both totals (for example, '10 alerts · 6 groups') so nothing appears to be missing. Groups keep chronological order by latest occurrence.",
+      "files_to_change": [
+        "demo-app/src/components/AlertList.tsx",
+        "demo-app/src/screens/AlertQueue.tsx",
+        "demo-app/src/styles/tokens.css"
+      ],
+      "pros": [
+        "Attacks the duplicate-open waste directly (38 opens per session, 64% closed as duplicates).",
+        "Shortens the list substantially when one noisy source repeats.",
+        "Grouping is explicitly allowed by D-07 as long as raw alerts stay reachable."
+      ],
+      "cons": [
+        "A critical alert still sits wherever its timestamp puts it, so a burst of distinct low-severity alerts can still bury it, and the metric gain is indirect.",
+        "Collapsed groups risk looking hidden to an auditor unless expand and counts are very clear (D-07 sensitivity).",
+        "Needs expand/collapse state and row-nesting inside Table, which makes it more complex to build.",
+        "Relies on fingerprint being exposed in the protected Alert type."
+      ],
+      "risk": "medium"
+    }
+  ],
+  "recommendation": {
+    "option": "A",
+    "why": "The quarter is judged on time to triage critical crown-jewel alerts (product.md), and median time to open a critical alert is 1260s against a 300s target (analytics.json#screens[\"/alerts\"].events.time_to_open_critical_s). The root cause is that AlertList.tsx orders only by time. Option A puts the most dangerous alerts first regardless of how much noise exists, and keeps every raw alert visible per D-07, at low risk. Option B reduces noise but leaves critical alerts positioned by timestamp; it is a good follow-up once ranking is in place."
+  },
+  "constraints_respected": [
+    {
+      "rule": "decisions.md#D-07: every raw alert stays visible",
+      "how": "Option A only reorders and annotates rows; every alert remains its own row. Option B groups alerts but keeps each raw alert one click away and shows full counts in the header. Neither option auto-closes or drops alerts."
+    },
+    {
+      "rule": "decisions.md#D-12: containment needs an incident lead",
+      "how": "The disabled-isolate signal is marked do_not_change. No option touches IncidentResponse.tsx's permission logic or demo-api/src/rules/containment.js."
+    },
+    {
+      "rule": "Edit only demo-app/src/components, demo-app/src/screens and demo-app/src/styles",
+      "how": "Both options change only AlertList.tsx, Badge.tsx, AlertQueue.tsx and tokens.css. The protected files (types.ts, client.ts, server.js, containment.js) are untouched."
+    },
+    {
+      "rule": "Design system: tokens only, sev tokens with the severity word, Table, Badge, --color-row-muted",
+      "how": "Option A uses Badge with --color-sev-* and keeps the severity text, and highlights with --color-sev-critical-bg. Option B styles collapsed rows with --color-row-muted. Both keep the existing Table with the first column left-aligned and add no hex values."
+    },
+    {
+      "rule": "Every claim cites a provided source",
+      "how": "Evidence cites only the given analytics paths, knowledge ids (product.md, personas.md, design-system.md, decisions.md#D-07, decisions.md#D-12) and repo-relative source files."
+    }
+  ]
+}

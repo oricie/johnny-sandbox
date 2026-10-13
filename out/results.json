@@ -1,0 +1,33 @@
+[
+  {
+    "option": "A",
+    "branch": "johnny/option-a",
+    "dir": "/home/user/johnny-sandbox/.worktrees/option-a",
+    "ok": true,
+    "sha": "bfd8cd8",
+    "summary": "Option A: the alert queue is now risk-ranked. AlertList sorts by severity, then asset criticality (crown-jewel > production > internal > test), then newest first. A new Asset column shows the asset name with its criticality underneath. Severity is a Badge with a severity variant built on the --color-sev-* tokens, so the word is always visible. Critical alerts on crown-jewel assets get a row background from --color-sev-critical-bg. Every alert is still its own row, as D-07 requires: nothing is grouped, hidden or closed. Badge's new variant prop is optional, so the existing Badge usages in PostureOverview and IncidentResponse don't change. By my calculation all new text colours pass WCAG AA on their backgrounds.",
+    "checks": "typecheck and build passed",
+    "files": [
+      "demo-app/src/components/Badge.tsx",
+      "demo-app/src/components/AlertList.tsx",
+      "demo-app/src/styles/tokens.css"
+    ],
+    "shot": "/home/user/johnny-sandbox/out/shots/option-a.png"
+  },
+  {
+    "option": "B",
+    "branch": "johnny/option-b",
+    "dir": "/home/user/johnny-sandbox/.worktrees/option-b",
+    "ok": true,
+    "sha": "5480a02",
+    "summary": "Option B is implemented. AlertList now collapses alerts that share a fingerprint into one summary row, and AlertQueue's subtitle shows both totals. Nothing was compiled or run, so I haven't confirmed that strict TypeScript passes or that the queue renders as described.\n\n**Summary rows.** Each one shows:\n- an expand toggle, the title and a count (for example, '×5')\n- the asset, the source and the highest severity in the group as a Badge with the word visible\n- the latest time\n\nSummary rows use `--color-row-muted`. Clicking the row or the toggle expands it to list every underlying raw alert with its ID; clicking one of those opens the incident as before. An alert whose fingerprint is unique still shows as a normal row.\n\n**Ordering.** Groups stay in chronological order by latest occurrence, and grouping changes nothing else about the order.\n\n**Subtitle.** It now reads '10 alerts · 6 groups' for the seed data. I dropped the word 'new' from the old '10 new alerts' to match the wording in Option B.\n\n**D-07 (every raw alert stays visible).** Every raw alert is always one click away. Nothing is dropped, auto-closed or permanently hidden, and the subtitle total accounts for all of them.\n\n**Other changes:**\n- Asset is now its own column, so the crown-jewel `dc-01` stands out next to the `test-runner-04` noise.\n- Severity in alert rows now uses Badge instead of plain text, as the design system requires.\n- I fixed the hex colour in PageHeader's subtitle, which was outside the planned files. It used `#b8bcc4`, which fails AA contrast (4.5:1) and is the line that now carries the totals. It now uses `--color-text-muted`.\n- I added a few row and toggle classes to tokens.css that use existing tokens only.",
+    "checks": "typecheck and build passed",
+    "files": [
+      "demo-app/src/components/AlertList.tsx",
+      "demo-app/src/screens/AlertQueue.tsx",
+      "demo-app/src/components/PageHeader.tsx",
+      "demo-app/src/styles/tokens.css"
+    ],
+    "shot": "/home/user/johnny-sandbox/out/shots/option-b.png"
+  }
+]

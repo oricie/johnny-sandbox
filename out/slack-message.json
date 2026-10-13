@@ -1,0 +1,90 @@
+{
+  "blocks": [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": "🔎 Critical alerts on crown-jewel assets are buried under duplicate low-severity noise in the alert queue"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "This hits the primary persona, the core job (triage), and the quarter's success metric directly. The queue's order ignores the two attributes analysts use to judge urgency, and the data needed to fix it is already in the API response.\n\n*Evidence*\n• Median time to open a critical alert is 1260s against a 300s target, more than four times over. — `analytics.json#screens[\"/alerts\"].events.time_to_open_critical_s`\n• The quarter's success metric is mean time to triage for critical alerts on crown-jewel assets, with a target under 5 minutes. — `product.md`\n• Analysts scroll a median of 46 rows before reaching a critical alert. — `analytics.json#screens[\"/alerts\"].events.scroll_depth_before_critical`\n• Analysts open a median of 38 alerts per session, and 64% of opened alerts are closed as duplicates within 20s. — `analytics.json#screens[\"/alerts\"].events.open_alert`\n• The 64% duplicate-close rate comes from the duplicate-close event. — `analytics.json#screens[\"/alerts\"].events.close_within_20s_as_duplicate`\n• Analysts spend a median of 2010s on the queue, versus 640s for incident leads. — `analytics.json#screens[\"/alerts\"].by_role`\n• An analyst reports opening 40 alerts to find the 3 that matter, and says half are the same PowerShell alert on a test box. — `analytics.json#feedback[0]`\n• An incident lead reports that the DC credential dump sat in the queue for 20 minutes under low-severity noise. — `analytics.json#feedback[1]`\n• AlertList sorts only by detectedAt (newest first), so severity and asset have no effect on order. — `demo-app/src/components/AlertList.tsx:9`\n• AlertList shows severity as plain text, not as a Badge with severity tokens, and has no asset column at all. — `demo-app/src/components/AlertList.tsx:11-18`\n• The API already returns asset, assetCriticality (crown-jewel/production/internal/test) and fingerprint for each alert, and the same ps-enc:test-runner-04 fingerprint repeats 5 times. — `demo-api/src/server.js`\n• The primary persona judges urgency by severity and by what the affected asset is, and needs to spot danger without opening every alert. — `personas.md`"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*🔒 Not changing*\n• Analysts click the disabled 'Isolate host' button: This friction is deliberate under decisions.md#D-12. Enabling containment for analysts or removing the restriction is out of bounds."
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*A · Risk-ranked queue*  — 3 files, low risk\nChange the queue's order so that it reflects urgency instead of arrival time. AlertList sorts by severity rank, then assetCriticality rank (crown-jewel > production > internal > test), then detectedAt descending. An Asset column shows asset name plus criticality. Severity renders as a Badge with a severity variant built on the --color-sev-* tokens, keeping the severity word visible. Critical rows on crown-jewel assets get the --color-sev-critical-bg background. Every alert remains a row, so nothing is hidden or closed.\n+ Targets the quarter's metric directly: critical crown-jewel alerts land in row 1 whatever the noise volume.\n+ Matches how the primary persona judges urgency: severity plus asset.\n+ Every raw alert stays visible as its own row, fully compliant with D-07.\n+ Uses the existing Table, Badge and sev tokens, so the change is small and contained.\n− Duplicate noise is still present lower in the list, so the 64% duplicate-close rate will improve only indirectly.\n− Relies on the Alert type in protected demo-app/src/api/types.ts exposing asset and assetCriticality. The API returns them, but the type cannot be edited if it lacks them.\n− Analysts used to strict chronological order may need a visible sort indicator."
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*B · Collapse duplicates by fingerprint*  — 3 files, medium risk\nReduce noise volume instead of reordering. AlertList groups alerts sharing a fingerprint into one summary row showing title, asset, a count (for example, '×5') and latest time. The row is styled with --color-row-muted and can be expanded to list every underlying raw alert. AlertQueue's subtitle reports both totals (for example, '10 alerts · 6 groups') so nothing appears to be missing. Groups keep chronological order by latest occurrence.\n+ Attacks the duplicate-open waste directly (38 opens per session, 64% closed as duplicates).\n+ Shortens the list substantially when one noisy source repeats.\n+ Grouping is explicitly allowed by D-07 as long as raw alerts stay reachable.\n− A critical alert still sits wherever its timestamp puts it, so a burst of distinct low-severity alerts can still bury it, and the metric gain is indirect.\n− Collapsed groups risk looking hidden to an auditor unless expand and counts are very clear (D-07 sensitivity).\n− Needs expand/collapse state and row-nesting inside Table, which makes it more complex to build.\n− Relies on fingerprint being exposed in the protected Alert type."
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Recommendation: A.* The quarter is judged on time to triage critical crown-jewel alerts (product.md), and median time to open a critical alert is 1260s against a 300s target (analytics.json#screens[\"/alerts\"].events.time_to_open_critical_s). The root cause is that AlertList.tsx orders only by time. Option A puts the most dangerous alerts first regardless of how much noise exists, and keeps every raw alert visible per D-07, at low risk. Option B reduces noise but leaves critical alerts positioned by timestamp; it is a good follow-up once ranking is in place."
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": "Citations checked: 27/27 valid"
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "action_id": "approve_a",
+          "text": {
+            "type": "plain_text",
+            "text": "Approve A"
+          },
+          "value": "A"
+        },
+        {
+          "type": "button",
+          "action_id": "approve_b",
+          "text": {
+            "type": "plain_text",
+            "text": "Approve B"
+          },
+          "value": "B",
+          "style": "primary"
+        },
+        {
+          "type": "button",
+          "action_id": "revise",
+          "text": {
+            "type": "plain_text",
+            "text": "Request changes"
+          }
+        }
+      ]
+    }
+  ]
+}

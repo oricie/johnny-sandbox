@@ -1,0 +1,554 @@
+{
+  "graph": {
+    "nodes": {
+      "demo-app/src/App.tsx": {
+        "file": "demo-app/src/App.tsx",
+        "kind": "route-table",
+        "exports": [
+          "App",
+          "routes"
+        ],
+        "imports": [
+          "node_modules/@types/react/index.d.ts",
+          "demo-app/src/screens/PostureOverview.tsx",
+          "demo-app/src/screens/AlertQueue.tsx",
+          "demo-app/src/screens/IncidentResponse.tsx"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/main.tsx": {
+        "file": "demo-app/src/main.tsx",
+        "kind": "other",
+        "exports": [],
+        "imports": [
+          "node_modules/@types/react-dom/client.d.ts",
+          "demo-app/src/App.tsx"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/api/client.ts": {
+        "file": "demo-app/src/api/client.ts",
+        "kind": "api-client",
+        "exports": [
+          "getAlerts",
+          "getIncident",
+          "getPermissions",
+          "isolateHost"
+        ],
+        "imports": [
+          "demo-app/src/api/types.ts",
+          "demo-app/src/data/seed.ts"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/api/types.ts": {
+        "file": "demo-app/src/api/types.ts",
+        "kind": "api-client",
+        "exports": [
+          "Severity",
+          "Alert",
+          "Incident",
+          "Permissions"
+        ],
+        "imports": [],
+        "apiCalls": []
+      },
+      "demo-app/src/components/AlertList.tsx": {
+        "file": "demo-app/src/components/AlertList.tsx",
+        "kind": "component",
+        "exports": [
+          "AlertList"
+        ],
+        "imports": [
+          "demo-app/src/api/types.ts",
+          "demo-app/src/components/Table.tsx"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/components/Badge.tsx": {
+        "file": "demo-app/src/components/Badge.tsx",
+        "kind": "component",
+        "exports": [
+          "Badge"
+        ],
+        "imports": [],
+        "apiCalls": []
+      },
+      "demo-app/src/components/Button.tsx": {
+        "file": "demo-app/src/components/Button.tsx",
+        "kind": "component",
+        "exports": [
+          "Button"
+        ],
+        "imports": [
+          "node_modules/@types/react/index.d.ts"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/components/PageHeader.tsx": {
+        "file": "demo-app/src/components/PageHeader.tsx",
+        "kind": "component",
+        "exports": [
+          "PageHeader"
+        ],
+        "imports": [],
+        "apiCalls": []
+      },
+      "demo-app/src/components/Table.tsx": {
+        "file": "demo-app/src/components/Table.tsx",
+        "kind": "component",
+        "exports": [
+          "Table"
+        ],
+        "imports": [
+          "node_modules/@types/react/index.d.ts"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/data/seed.ts": {
+        "file": "demo-app/src/data/seed.ts",
+        "kind": "data",
+        "exports": [
+          "seedAlerts",
+          "seedIncident"
+        ],
+        "imports": [
+          "demo-app/src/api/types.ts"
+        ],
+        "apiCalls": []
+      },
+      "demo-app/src/screens/AlertQueue.tsx": {
+        "file": "demo-app/src/screens/AlertQueue.tsx",
+        "kind": "screen",
+        "exports": [
+          "AlertQueue"
+        ],
+        "imports": [
+          "node_modules/@types/react/index.d.ts",
+          "demo-app/src/api/client.ts",
+          "demo-app/src/api/types.ts",
+          "demo-app/src/components/PageHeader.tsx",
+          "demo-app/src/components/AlertList.tsx"
+        ],
+        "apiCalls": [
+          "GET /api/alerts"
+        ]
+      },
+      "demo-app/src/screens/IncidentResponse.tsx": {
+        "file": "demo-app/src/screens/IncidentResponse.tsx",
+        "kind": "screen",
+        "exports": [
+          "IncidentResponse"
+        ],
+        "imports": [
+          "node_modules/@types/react/index.d.ts",
+          "demo-app/src/api/client.ts",
+          "demo-app/src/api/types.ts",
+          "demo-app/src/components/PageHeader.tsx",
+          "demo-app/src/components/Badge.tsx",
+          "demo-app/src/components/Button.tsx"
+        ],
+        "apiCalls": [
+          "GET /api/incidents/:param",
+          "GET /api/me/permissions",
+          "POST /api/incidents/:param/isolate"
+        ]
+      },
+      "demo-app/src/screens/PostureOverview.tsx": {
+        "file": "demo-app/src/screens/PostureOverview.tsx",
+        "kind": "screen",
+        "exports": [
+          "PostureOverview"
+        ],
+        "imports": [
+          "node_modules/@types/react/index.d.ts",
+          "demo-app/src/api/client.ts",
+          "demo-app/src/api/types.ts",
+          "demo-app/src/components/PageHeader.tsx",
+          "demo-app/src/components/Badge.tsx",
+          "demo-app/src/components/Table.tsx"
+        ],
+        "apiCalls": [
+          "GET /api/alerts"
+        ]
+      }
+    },
+    "routes": [
+      {
+        "path": "/overview",
+        "screen": "PostureOverview",
+        "file": "demo-app/src/screens/PostureOverview.tsx"
+      },
+      {
+        "path": "/alerts",
+        "screen": "AlertQueue",
+        "file": "demo-app/src/screens/AlertQueue.tsx"
+      },
+      {
+        "path": "/incident",
+        "screen": "IncidentResponse",
+        "file": "demo-app/src/screens/IncidentResponse.tsx"
+      }
+    ],
+    "backend": [
+      {
+        "route": "GET /api/alerts",
+        "file": "demo-api/src/server.js",
+        "uses": []
+      },
+      {
+        "route": "GET /api/me/permissions",
+        "file": "demo-api/src/server.js",
+        "uses": []
+      },
+      {
+        "route": "GET /api/incidents/:param",
+        "file": "demo-api/src/server.js",
+        "uses": []
+      },
+      {
+        "route": "POST /api/incidents/:param/isolate",
+        "file": "demo-api/src/server.js",
+        "uses": [
+          "demo-api/src/rules/containment.js"
+        ]
+      }
+    ]
+  },
+  "packs": [
+    {
+      "screen": "/overview",
+      "screenFile": "demo-app/src/screens/PostureOverview.tsx",
+      "components": [
+        "demo-app/src/components/Table.tsx",
+        "demo-app/src/components/Badge.tsx",
+        "demo-app/src/components/PageHeader.tsx"
+      ],
+      "apiCalls": [
+        "GET /api/alerts"
+      ],
+      "backendFiles": [
+        "demo-api/src/server.js"
+      ],
+      "signals": [
+        {
+          "id": "/overview:exit_rate",
+          "screen": "/overview",
+          "metric": "exit_rate",
+          "value": 0.22,
+          "source": "analytics.json#screens[\"/overview\"]"
+        },
+        {
+          "id": "/overview:median_time_s",
+          "screen": "/overview",
+          "metric": "median_time_s",
+          "value": 28,
+          "source": "analytics.json#screens[\"/overview\"]"
+        },
+        {
+          "id": "/overview:feedback:3",
+          "screen": "/overview",
+          "metric": "feedback",
+          "value": "The grey subtitle is hard to read on my laptop.",
+          "detail": {
+            "role": "viewer"
+          },
+          "source": "analytics.json#feedback[3]"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "design-system.md",
+          "type": "design-system",
+          "title": "Design system",
+          "scope": [
+            "demo-app/src/components/**",
+            "demo-app/src/styles/**"
+          ],
+          "body": "# Design system\n\n- All colours come from tokens in `demo-app/src/styles/tokens.css`. No hex values in components.\n- Severity uses the `--color-sev-*` tokens. Never rely on colour alone: always show the severity word too.\n- Use `Table` for lists of records; do not build raw tables. First column left-aligned.\n- Use `Badge` for status and severity labels.\n- Muted or collapsed rows use `--color-row-muted`.\n- Text must meet WCAG AA contrast (4.5:1) against its background."
+        },
+        {
+          "id": "personas.md",
+          "type": "persona",
+          "title": "Personas",
+          "scope": [
+            "demo-app/src/screens/**"
+          ],
+          "body": "# Personas\n\n## Dana — Tier-1 SOC analyst (primary)\nWorks the alert queue all shift. Needs to spot what is dangerous *right now* without opening\nevery alert. Judges urgency by severity and by what the affected asset is.\n\n## Omer — Incident lead\nPicks up escalated incidents and approves containment. The only role allowed to isolate hosts.\n\n## Lior — CISO (viewer)\nRead-only. Looks at the posture overview before leadership meetings."
+        },
+        {
+          "id": "product.md",
+          "type": "product",
+          "title": "Sentinel",
+          "scope": [
+            "demo-app/**"
+          ],
+          "body": "# Sentinel\n\nSentinel is a security operations console for mid-size companies. It pulls alerts from\nEDR, SIEM, cloud and email security tools into one queue. A small SOC team triages them,\nopens incidents for real threats, and runs containment.\n\n## Core jobs\n1. Triage the alert queue: find the few alerts that matter among hundreds.\n2. Investigate an incident and decide on containment.\n3. Report posture to leadership.\n\n## Success metric for this quarter\nMean time to triage (MTTT) for critical alerts on crown-jewel assets. Target: under 5 minutes."
+        }
+      ],
+      "protectedFiles": [
+        "demo-app/src/api/types.ts",
+        "demo-app/src/api/client.ts",
+        "demo-api/src/server.js"
+      ]
+    },
+    {
+      "screen": "/alerts",
+      "screenFile": "demo-app/src/screens/AlertQueue.tsx",
+      "components": [
+        "demo-app/src/components/AlertList.tsx",
+        "demo-app/src/components/Table.tsx",
+        "demo-app/src/components/PageHeader.tsx"
+      ],
+      "apiCalls": [
+        "GET /api/alerts"
+      ],
+      "backendFiles": [
+        "demo-api/src/server.js"
+      ],
+      "signals": [
+        {
+          "id": "/alerts:exit_rate",
+          "screen": "/alerts",
+          "metric": "exit_rate",
+          "value": 0.09,
+          "source": "analytics.json#screens[\"/alerts\"]"
+        },
+        {
+          "id": "/alerts:median_time_s",
+          "screen": "/alerts",
+          "metric": "median_time_s",
+          "value": 1840,
+          "source": "analytics.json#screens[\"/alerts\"]"
+        },
+        {
+          "id": "/alerts:open_alert",
+          "screen": "/alerts",
+          "metric": "open_alert",
+          "value": 41200,
+          "detail": {
+            "count": 41200,
+            "per_session_median": 38
+          },
+          "source": "analytics.json#screens[\"/alerts\"].events.open_alert"
+        },
+        {
+          "id": "/alerts:close_within_20s_as_duplicate",
+          "screen": "/alerts",
+          "metric": "close_within_20s_as_duplicate",
+          "value": 0.64,
+          "detail": {
+            "rate": 0.64
+          },
+          "source": "analytics.json#screens[\"/alerts\"].events.close_within_20s_as_duplicate"
+        },
+        {
+          "id": "/alerts:time_to_open_critical_s",
+          "screen": "/alerts",
+          "metric": "time_to_open_critical_s",
+          "value": 1260,
+          "detail": {
+            "median": 1260,
+            "target": 300
+          },
+          "source": "analytics.json#screens[\"/alerts\"].events.time_to_open_critical_s"
+        },
+        {
+          "id": "/alerts:scroll_depth_before_critical",
+          "screen": "/alerts",
+          "metric": "scroll_depth_before_critical",
+          "value": 46,
+          "detail": {
+            "median_rows": 46
+          },
+          "source": "analytics.json#screens[\"/alerts\"].events.scroll_depth_before_critical"
+        },
+        {
+          "id": "/alerts:by_role",
+          "screen": "/alerts",
+          "metric": "by_role",
+          "value": "see detail",
+          "detail": {
+            "analyst": {
+              "median_time_s": 2010
+            },
+            "incident_lead": {
+              "median_time_s": 640
+            }
+          },
+          "source": "analytics.json#screens[\"/alerts\"].by_role"
+        },
+        {
+          "id": "/alerts:feedback:0",
+          "screen": "/alerts",
+          "metric": "feedback",
+          "value": "I open 40 alerts to find the 3 that matter. Half are the same PowerShell alert on a test box.",
+          "detail": {
+            "role": "analyst"
+          },
+          "source": "analytics.json#feedback[0]"
+        },
+        {
+          "id": "/alerts:feedback:1",
+          "screen": "/alerts",
+          "metric": "feedback",
+          "value": "The DC credential dump sat in the queue for 20 minutes under a pile of low-severity noise.",
+          "detail": {
+            "role": "incident_lead"
+          },
+          "source": "analytics.json#feedback[1]"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "decisions.md#D-07",
+          "type": "decision",
+          "title": "D-07 · Every raw alert stays visible",
+          "scope": [
+            "demo-app/src/components/AlertList.tsx",
+            "demo-app/src/screens/AlertQueue.tsx"
+          ],
+          "body": "D-07 · Every raw alert stays visible\n\n\nOur SOC 2 audit requires that analysts can see every alert we ingested. Grouping or\nprioritising is fine, but never auto-close, drop or permanently hide an alert."
+        },
+        {
+          "id": "design-system.md",
+          "type": "design-system",
+          "title": "Design system",
+          "scope": [
+            "demo-app/src/components/**",
+            "demo-app/src/styles/**"
+          ],
+          "body": "# Design system\n\n- All colours come from tokens in `demo-app/src/styles/tokens.css`. No hex values in components.\n- Severity uses the `--color-sev-*` tokens. Never rely on colour alone: always show the severity word too.\n- Use `Table` for lists of records; do not build raw tables. First column left-aligned.\n- Use `Badge` for status and severity labels.\n- Muted or collapsed rows use `--color-row-muted`.\n- Text must meet WCAG AA contrast (4.5:1) against its background."
+        },
+        {
+          "id": "personas.md",
+          "type": "persona",
+          "title": "Personas",
+          "scope": [
+            "demo-app/src/screens/**"
+          ],
+          "body": "# Personas\n\n## Dana — Tier-1 SOC analyst (primary)\nWorks the alert queue all shift. Needs to spot what is dangerous *right now* without opening\nevery alert. Judges urgency by severity and by what the affected asset is.\n\n## Omer — Incident lead\nPicks up escalated incidents and approves containment. The only role allowed to isolate hosts.\n\n## Lior — CISO (viewer)\nRead-only. Looks at the posture overview before leadership meetings."
+        },
+        {
+          "id": "product.md",
+          "type": "product",
+          "title": "Sentinel",
+          "scope": [
+            "demo-app/**"
+          ],
+          "body": "# Sentinel\n\nSentinel is a security operations console for mid-size companies. It pulls alerts from\nEDR, SIEM, cloud and email security tools into one queue. A small SOC team triages them,\nopens incidents for real threats, and runs containment.\n\n## Core jobs\n1. Triage the alert queue: find the few alerts that matter among hundreds.\n2. Investigate an incident and decide on containment.\n3. Report posture to leadership.\n\n## Success metric for this quarter\nMean time to triage (MTTT) for critical alerts on crown-jewel assets. Target: under 5 minutes."
+        }
+      ],
+      "protectedFiles": [
+        "demo-app/src/api/types.ts",
+        "demo-app/src/api/client.ts",
+        "demo-api/src/server.js"
+      ]
+    },
+    {
+      "screen": "/incident",
+      "screenFile": "demo-app/src/screens/IncidentResponse.tsx",
+      "components": [
+        "demo-app/src/components/Button.tsx",
+        "demo-app/src/components/Badge.tsx",
+        "demo-app/src/components/PageHeader.tsx"
+      ],
+      "apiCalls": [
+        "GET /api/incidents/:param",
+        "GET /api/me/permissions",
+        "POST /api/incidents/:param/isolate"
+      ],
+      "backendFiles": [
+        "demo-api/src/server.js",
+        "demo-api/src/rules/containment.js"
+      ],
+      "signals": [
+        {
+          "id": "/incident:exit_rate",
+          "screen": "/incident",
+          "metric": "exit_rate",
+          "value": 0.14,
+          "source": "analytics.json#screens[\"/incident\"]"
+        },
+        {
+          "id": "/incident:median_time_s",
+          "screen": "/incident",
+          "metric": "median_time_s",
+          "value": 520,
+          "source": "analytics.json#screens[\"/incident\"]"
+        },
+        {
+          "id": "/incident:click_disabled_isolate",
+          "screen": "/incident",
+          "metric": "click_disabled_isolate",
+          "value": 780,
+          "detail": {
+            "count": 780,
+            "by_role": {
+              "analyst": 760,
+              "incident_lead": 0,
+              "viewer": 20
+            }
+          },
+          "source": "analytics.json#screens[\"/incident\"].events.click_disabled_isolate"
+        },
+        {
+          "id": "/incident:feedback:2",
+          "screen": "/incident",
+          "metric": "feedback",
+          "value": "Why can't I just isolate the host myself? Waiting for a lead is annoying.",
+          "detail": {
+            "role": "analyst"
+          },
+          "source": "analytics.json#feedback[2]"
+        }
+      ],
+      "knowledge": [
+        {
+          "id": "decisions.md#D-12",
+          "type": "decision",
+          "title": "D-12 · Containment needs an incident lead",
+          "scope": [
+            "demo-api/src/rules/containment.js",
+            "demo-app/src/screens/IncidentResponse.tsx"
+          ],
+          "body": "D-12 · Containment needs an incident lead\n\n\nIsolating a host can take production offline. After a 2025 outage caused by an analyst\nisolating the payments gateway, only incident leads may run containment. This is a\ndeliberate control, not a UX gap. Do not enable the button for analysts, do not hide\nthe restriction, and do not bypass the API check."
+        },
+        {
+          "id": "design-system.md",
+          "type": "design-system",
+          "title": "Design system",
+          "scope": [
+            "demo-app/src/components/**",
+            "demo-app/src/styles/**"
+          ],
+          "body": "# Design system\n\n- All colours come from tokens in `demo-app/src/styles/tokens.css`. No hex values in components.\n- Severity uses the `--color-sev-*` tokens. Never rely on colour alone: always show the severity word too.\n- Use `Table` for lists of records; do not build raw tables. First column left-aligned.\n- Use `Badge` for status and severity labels.\n- Muted or collapsed rows use `--color-row-muted`.\n- Text must meet WCAG AA contrast (4.5:1) against its background."
+        },
+        {
+          "id": "personas.md",
+          "type": "persona",
+          "title": "Personas",
+          "scope": [
+            "demo-app/src/screens/**"
+          ],
+          "body": "# Personas\n\n## Dana — Tier-1 SOC analyst (primary)\nWorks the alert queue all shift. Needs to spot what is dangerous *right now* without opening\nevery alert. Judges urgency by severity and by what the affected asset is.\n\n## Omer — Incident lead\nPicks up escalated incidents and approves containment. The only role allowed to isolate hosts.\n\n## Lior — CISO (viewer)\nRead-only. Looks at the posture overview before leadership meetings."
+        },
+        {
+          "id": "product.md",
+          "type": "product",
+          "title": "Sentinel",
+          "scope": [
+            "demo-app/**"
+          ],
+          "body": "# Sentinel\n\nSentinel is a security operations console for mid-size companies. It pulls alerts from\nEDR, SIEM, cloud and email security tools into one queue. A small SOC team triages them,\nopens incidents for real threats, and runs containment.\n\n## Core jobs\n1. Triage the alert queue: find the few alerts that matter among hundreds.\n2. Investigate an incident and decide on containment.\n3. Report posture to leadership.\n\n## Success metric for this quarter\nMean time to triage (MTTT) for critical alerts on crown-jewel assets. Target: under 5 minutes."
+        }
+      ],
+      "protectedFiles": [
+        "demo-app/src/api/types.ts",
+        "demo-app/src/api/client.ts",
+        "demo-api/src/server.js",
+        "demo-api/src/rules/containment.js"
+      ]
+    }
+  ]
+}
