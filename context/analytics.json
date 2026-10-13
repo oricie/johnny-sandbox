@@ -1,0 +1,38 @@
+{
+  "period": "2026-09-01/2026-09-30",
+  "source": "mock",
+  "screens": {
+    "/overview": {
+      "sessions": 4120,
+      "median_time_s": 34,
+      "exit_rate": 0.18
+    },
+    "/scenarios/edit": {
+      "sessions": 2890,
+      "median_time_s": 410,
+      "exit_rate": 0.12,
+      "events": {
+        "click_locked_cell": { "count": 1630, "by_role": { "analyst": 1540, "finance_manager": 0, "viewer": 90 } }
+      }
+    },
+    "/compare": {
+      "sessions": 1980,
+      "median_time_s": 265,
+      "exit_rate": 0.61,
+      "events": {
+        "tab_switch": { "count": 9450, "per_session_median": 6 },
+        "copy_value": { "count": 2210 },
+        "exit_after_tab_switch": { "rate": 0.58 }
+      },
+      "by_role": {
+        "analyst": { "exit_rate": 0.55 },
+        "finance_manager": { "exit_rate": 0.72 }
+      }
+    }
+  },
+  "feedback": [
+    { "screen": "/compare", "role": "finance_manager", "text": "I keep flipping between tabs and writing numbers on paper to see what changed." },
+    { "screen": "/scenarios/edit", "role": "analyst", "text": "Why can't I edit Base? Annoying." },
+    { "screen": "/overview", "role": "viewer", "text": "The grey subtitle is hard to read on my laptop." }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "atlas",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "observe": "tsx src/observe/cli.ts",
+    "run": "tsx src/run.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "ts-morph": "^28.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}
