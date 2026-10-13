@@ -48,4 +48,6 @@ ANTHROPIC_API_KEY=... npm run johnny   # full observe -> decide -> guard -> repo
 npm run api & npm run app       # see the product at http://localhost:5173
 ```
 
-Without an API key `npm run johnny` stops after observe.
+The key can be an `ANTHROPIC_API_KEY` environment variable, or (in a Claude Code cloud
+environment) a network secret for `api.anthropic.com` that sends the `x-api-key` header.
+`npm run johnny -- --observe-only` stops after observe.

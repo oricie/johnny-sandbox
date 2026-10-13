@@ -21,10 +21,7 @@ fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, "evidence.json"), JSON.stringify({ graph, packs }, null, 2));
 lap(`observe: ${Object.keys(graph.nodes).length} files, ${packs.length} screens, ${signals.length} signals -> out/evidence.json`);
 
-if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
-  console.log("\nNo ANTHROPIC_API_KEY set. Stopping after observe; evidence is in out/evidence.json.");
-  process.exit(0);
-}
+if (process.argv.includes("--observe-only")) process.exit(0);
 
 const decision = await decide(packs);
 fs.writeFileSync(path.join(OUT, "decision.json"), JSON.stringify(decision, null, 2));
