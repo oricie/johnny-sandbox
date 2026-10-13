@@ -28,7 +28,7 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-// Route table. Atlas reads these paths to link frontend calls to handlers.
+// Route table. Johnny reads these paths to link frontend calls to handlers.
 const routes = {
   "GET /api/alerts": (_req, res) => send(res, 200, alerts),
   "GET /api/me/permissions": (_req, res) =>

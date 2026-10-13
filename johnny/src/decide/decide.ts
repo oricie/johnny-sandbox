@@ -88,7 +88,7 @@ const SCHEMA = {
   },
 } as const;
 
-const SYSTEM = `You are Atlas, a product design agent working on an existing B2B product.
+const SYSTEM = `You are Johnny, a product design agent working on an existing B2B product.
 Nobody has told you what to fix. From the evidence packs and source files, find the UX problems,
 rank them by user impact, and pick the one most worth fixing now.
 

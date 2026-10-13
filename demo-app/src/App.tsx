@@ -3,7 +3,7 @@ import { PostureOverview } from "./screens/PostureOverview";
 import { AlertQueue } from "./screens/AlertQueue";
 import { IncidentResponse } from "./screens/IncidentResponse";
 
-// Route table. Atlas reads this to map analytics screens to components.
+// Route table. Johnny reads this to map analytics screens to components.
 export const routes = [
   { path: "/overview", screen: PostureOverview, title: "Posture" },
   { path: "/alerts", screen: AlertQueue, title: "Alert queue" },
