@@ -47,6 +47,8 @@ slack     (next) Bolt app in Socket Mode posting the payload and handling button
 npm install
 npm run observe                 # print the graph and evidence packs
 npm run johnny -- --decision fixtures/decision-run3.json --act   # build both options from a saved decision
+npm run johnny -- --request "Add a filter by source" --act        # request mode: a teammate's ask
+npm run eval -- --runs 5                                          # consistency check of the decide step
 JOHNNY_ANTHROPIC_KEY=... npm run johnny   # full observe -> decide -> guard -> report
 npm run api & npm run app       # see the product at http://localhost:5173
 ```

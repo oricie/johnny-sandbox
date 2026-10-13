@@ -66,8 +66,11 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff}bu
 </style></head><body>
 <div class="top"># product-design<span>Johnny thread · demo (no live Slack)</span></div>
 <div class="wrap">
+${d.request ? `<div class="msg"><div class="av" style="background:#2eb67d">O</div><div>
+<div class="who">Ori</div><p>@Johnny ${esc(d.request.text)}</p></div></div>` : ""}
 <div class="msg"><div class="av" style="background:#4a154b">J</div><div>
-<div class="who">Johnny<span class="app">APP</span><small>proactive review</small></div>
+<div class="who">Johnny<span class="app">APP</span><small>${d.request ? "reply" : "proactive review"}</small></div>
+${d.request ? `<div class="box"><b>${d.request.verdict === "push_back" ? "✋ I don't think we should do this as asked" : "👍 On it"}</b><p>${esc(d.request.explanation)}</p></div>` : ""}
 <h3>🔎 ${esc(chosen.title)}</h3>
 <p>${esc(chosen.reason)}</p>
 <b>Evidence</b><ul>${chosen.evidence.slice(0, 6).map((e) => `<li>${esc(e.claim)} <span class="src">${esc(e.source)}</span></li>`).join("")}</ul>

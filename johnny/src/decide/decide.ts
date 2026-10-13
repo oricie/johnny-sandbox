@@ -25,6 +25,8 @@ export interface Decision {
   }[];
   recommendation: { option: "A" | "B"; why: string };
   constraints_respected: { rule: string; how: string }[];
+  // Only in request mode: what Johnny makes of a teammate's ask.
+  request?: { text: string; verdict: "proceed" | "push_back"; explanation: string };
 }
 
 const SCHEMA = {
@@ -110,4 +112,39 @@ export async function decide(packs: EvidencePack[]): Promise<Decision> {
     `Evidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}`,
     SCHEMA,
   );
+}
+
+const REQUEST_SCHEMA = {
+  ...SCHEMA,
+  required: [...SCHEMA.required, "request_verdict"],
+  properties: {
+    ...SCHEMA.properties,
+    request_verdict: {
+      type: "object", additionalProperties: false, required: ["verdict", "explanation"],
+      properties: { verdict: { type: "string", enum: ["proceed", "push_back"] }, explanation: { type: "string" } },
+    },
+  },
+};
+
+const REQUEST_SYSTEM = `You are Johnny, a product design agent working on an existing B2B product.
+A teammate asked for a change. Treat it like a design brief, not an order.
+
+- Check the ask against the product decisions, personas, design system and usage evidence.
+- If doing it as asked would break an active decision or rule, set request_verdict.verdict to
+  "push_back", say which decision and why in plain words, and make both options alternatives that
+  serve the underlying need without breaking the rule. Never propose the forbidden change.
+- Otherwise set "proceed" and make options A and B two different ways to deliver the ask.
+- Put the ask itself as the chosen finding (screen it affects, evidence for or against it). Add other
+  findings only if they bear directly on the ask (for example a decision it collides with).
+- Every claim cites a source you were given. Options may only change files under
+  demo-app/src/components, demo-app/src/screens or demo-app/src/styles, using the design system.`;
+
+export async function decideRequest(packs: EvidencePack[], text: string): Promise<Decision> {
+  const d = await structured<Decision & { request_verdict: { verdict: "proceed" | "push_back"; explanation: string } }>(
+    REQUEST_SYSTEM,
+    `Teammate's request: "${text}"\n\nEvidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}`,
+    REQUEST_SCHEMA,
+  );
+  const { request_verdict, ...rest } = d;
+  return { ...rest, request: { text, ...request_verdict } };
 }

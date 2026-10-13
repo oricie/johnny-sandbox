@@ -5,7 +5,7 @@ import { buildCodeGraph } from "./observe/codeGraph";
 import { loadKnowledge } from "./observe/knowledge";
 import { loadSignals } from "./observe/signals";
 import { buildEvidencePacks } from "./decide/evidence";
-import { decide, type Decision } from "./decide/decide";
+import { decide, decideRequest, type Decision } from "./decide/decide";
 import { checkPlan } from "./guard/constraints";
 import { checkCitations } from "./guard/citations";
 import { buildSlackMessage } from "./report/slack";
@@ -16,6 +16,7 @@ import { buildThreadPage, type OptionResult } from "./report/thread";
 // Flags:
 //   --observe-only        stop after observe
 //   --decision <file>     reuse a saved decision instead of calling the model to decide
+//   --request "<text>"    request mode: a teammate's ask instead of Johnny's own review
 //   --act                 implement both options in worktrees, check, screenshot, write out/thread.html
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(name);
@@ -34,11 +35,13 @@ lap(`observe: ${Object.keys(graph.nodes).length} files, ${packs.length} screens,
 if (flag("--observe-only")) process.exit(0);
 
 const saved = value("--decision");
+const request = value("--request");
 const decision: Decision = saved
   ? JSON.parse(fs.readFileSync(path.resolve(ROOT, saved), "utf8"))
-  : await decide(packs);
+  : request ? await decideRequest(packs, request) : await decide(packs);
 fs.writeFileSync(path.join(OUT, "decision.json"), JSON.stringify(decision, null, 2));
 lap(`decide${saved ? ` (from ${saved})` : ""}: ${decision.findings.length} findings, chose "${decision.chosen_finding}"`);
+if (decision.request) console.log(`  request verdict: ${decision.request.verdict}: ${decision.request.explanation}`);
 
 for (const o of decision.options) {
   const plan = checkPlan(o.files_to_change);
