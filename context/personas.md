@@ -4,13 +4,12 @@ scope: ["demo-app/src/screens/**"]
 ---
 # Personas
 
-## Dana — FP&A Analyst (primary)
-Builds draft scenarios. Spends most of her time in the editor and the comparison view.
-Needs to explain *why* Growth costs more than Base, line by line, in a review meeting.
+## Dana — Tier-1 SOC analyst (primary)
+Works the alert queue all shift. Needs to spot what is dangerous *right now* without opening
+every alert. Judges urgency by severity and by what the affected asset is.
 
-## Omer — Finance Manager
-Approves scenarios. Opens the comparison view, wants to see only what changed and by how much.
-Rarely edits. The only role allowed to change an approved scenario.
+## Omer — Incident lead
+Picks up escalated incidents and approves containment. The only role allowed to isolate hosts.
 
-## Lior — Department Head (viewer)
-Read-only. Looks at the overview to see the total for their department.
+## Lior — CISO (viewer)
+Read-only. Looks at the posture overview before leadership meetings.

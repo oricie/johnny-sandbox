@@ -5,9 +5,12 @@
   --color-text-muted: #5b6270;
   --color-border: #e2e5ea;
   --color-accent: #2f5bea;
-  --color-positive: #12805c;
-  --color-negative: #c2372e;
-  --color-locked-bg: #f1f2f4;
+  --color-sev-critical: #b42318;
+  --color-sev-high: #c4320a;
+  --color-sev-medium: #a15c07;
+  --color-sev-low: #475467;
+  --color-sev-critical-bg: #fef3f2;
+  --color-row-muted: #f1f2f4;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -26,7 +29,7 @@ body { margin: 0; font-family: var(--font); background: var(--color-bg); color: 
 .table { width: 100%; border-collapse: collapse; background: var(--color-surface); border: 1px solid var(--color-border); }
 .table th, .table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); text-align: right; }
 .table th:first-child, .table td:first-child { text-align: left; }
-.cell-locked { background: var(--color-locked-bg); color: var(--color-text-muted); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
 .btn { font: inherit; padding: var(--space-2) var(--space-3); border-radius: var(--radius); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer; }
 .btn[aria-pressed="true"] { border-color: var(--color-accent); color: var(--color-accent); }
 .badge { font-size: 12px; padding: 2px var(--space-2); border-radius: 999px; background: var(--color-bg); border: 1px solid var(--color-border); }

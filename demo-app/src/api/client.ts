@@ -1,5 +1,5 @@
-import type { Permissions, Scenario } from "./types";
-import { seedScenarios } from "../data/seed";
+import type { Alert, Incident, Permissions } from "./types";
+import { seedAlerts, seedIncident } from "../data/seed";
 
 // Falls back to seed data when demo-api is not running, so the UI always renders.
 async function get<T>(url: string, fallback: T): Promise<T> {
@@ -12,19 +12,19 @@ async function get<T>(url: string, fallback: T): Promise<T> {
   }
 }
 
-export function getScenarios(): Promise<Scenario[]> {
-  return get("/api/scenarios", seedScenarios);
+export function getAlerts(): Promise<Alert[]> {
+  return get("/api/alerts", seedAlerts);
+}
+
+export function getIncident(id: string): Promise<Incident> {
+  return get(`/api/incidents/${id}`, seedIncident);
 }
 
 export function getPermissions(): Promise<Permissions> {
-  return get("/api/me/permissions", { role: "analyst", canEditApproved: false });
+  return get("/api/me/permissions", { role: "analyst", canRunContainment: false });
 }
 
-export async function updateLine(scenarioId: string, line: string, amount: number): Promise<boolean> {
-  const res = await fetch(`/api/scenarios/${scenarioId}/lines`, {
-    method: "PATCH",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ line, amount }),
-  }).catch(() => null);
+export async function isolateHost(incidentId: string): Promise<boolean> {
+  const res = await fetch(`/api/incidents/${incidentId}/isolate`, { method: "POST" }).catch(() => null);
   return Boolean(res?.ok);
 }

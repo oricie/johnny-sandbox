@@ -1,13 +1,27 @@
-export type ScenarioStatus = "draft" | "approved";
+export type Severity = "critical" | "high" | "medium" | "low";
 
-export interface Scenario {
+export interface Alert {
   id: string;
-  name: string;
-  status: ScenarioStatus;
-  lines: Record<string, number>; // budget line -> amount
+  title: string;
+  severity: Severity;
+  asset: string;
+  assetCriticality: "crown-jewel" | "production" | "internal" | "test";
+  source: "EDR" | "SIEM" | "Cloud" | "Email";
+  fingerprint: string; // same detection on the same asset
+  detectedAt: string; // ISO
+  status: "new" | "investigating" | "closed";
+}
+
+export interface Incident {
+  id: string;
+  title: string;
+  severity: Severity;
+  host: string;
+  alerts: string[];
+  isolated: boolean;
 }
 
 export interface Permissions {
-  role: "analyst" | "finance_manager" | "viewer";
-  canEditApproved: boolean;
+  role: "analyst" | "incident_lead" | "viewer";
+  canRunContainment: boolean;
 }

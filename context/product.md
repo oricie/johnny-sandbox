@@ -2,16 +2,16 @@
 type: product
 scope: ["demo-app/**"]
 ---
-# Ledgerline
+# Sentinel
 
-Ledgerline is a budget-planning tool for mid-size companies. Finance teams build
-scenarios (Base, Growth, Lean) for the next fiscal year, compare them, and get one
-of them approved by a finance manager.
+Sentinel is a security operations console for mid-size companies. It pulls alerts from
+EDR, SIEM, cloud and email security tools into one queue. A small SOC team triages them,
+opens incidents for real threats, and runs containment.
 
 ## Core jobs
-1. Build and edit draft scenarios line by line.
-2. Compare a draft scenario against the approved Base to explain the difference to leadership.
-3. Approve a scenario and freeze it.
+1. Triage the alert queue: find the few alerts that matter among hundreds.
+2. Investigate an incident and decide on containment.
+3. Report posture to leadership.
 
 ## Success metric for this quarter
-Time from "draft ready" to "approved" — the comparison step is where reviews stall.
+Mean time to triage (MTTT) for critical alerts on crown-jewel assets. Target: under 5 minutes.

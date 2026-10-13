@@ -21,7 +21,7 @@ export function loadSignals(): Signal[] {
     signals.push({ id: `${screen}:exit_rate`, screen, metric: "exit_rate", value: s.exit_rate, source: src });
     signals.push({ id: `${screen}:median_time_s`, screen, metric: "median_time_s", value: s.median_time_s, source: src });
     for (const [event, detail] of Object.entries(s.events ?? {})) {
-      signals.push({ id: `${screen}:${event}`, screen, metric: event, value: (detail.count ?? detail.rate) as number, detail, source: `${src}.events.${event}` });
+      signals.push({ id: `${screen}:${event}`, screen, metric: event, value: Object.values(detail).find((v) => typeof v === "number") as number, detail, source: `${src}.events.${event}` });
     }
     if (s.by_role) signals.push({ id: `${screen}:by_role`, screen, metric: "by_role", value: "see detail", detail: s.by_role, source: `${src}.by_role` });
   }

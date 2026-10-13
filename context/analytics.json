@@ -3,36 +3,38 @@
   "source": "mock",
   "screens": {
     "/overview": {
-      "sessions": 4120,
-      "median_time_s": 34,
-      "exit_rate": 0.18
+      "sessions": 1240,
+      "median_time_s": 28,
+      "exit_rate": 0.22
     },
-    "/scenarios/edit": {
-      "sessions": 2890,
-      "median_time_s": 410,
-      "exit_rate": 0.12,
+    "/alerts": {
+      "sessions": 6820,
+      "median_time_s": 1840,
+      "exit_rate": 0.09,
       "events": {
-        "click_locked_cell": { "count": 1630, "by_role": { "analyst": 1540, "finance_manager": 0, "viewer": 90 } }
-      }
-    },
-    "/compare": {
-      "sessions": 1980,
-      "median_time_s": 265,
-      "exit_rate": 0.61,
-      "events": {
-        "tab_switch": { "count": 9450, "per_session_median": 6 },
-        "copy_value": { "count": 2210 },
-        "exit_after_tab_switch": { "rate": 0.58 }
+        "open_alert": { "count": 41200, "per_session_median": 38 },
+        "close_within_20s_as_duplicate": { "rate": 0.64 },
+        "time_to_open_critical_s": { "median": 1260, "target": 300 },
+        "scroll_depth_before_critical": { "median_rows": 46 }
       },
       "by_role": {
-        "analyst": { "exit_rate": 0.55 },
-        "finance_manager": { "exit_rate": 0.72 }
+        "analyst": { "median_time_s": 2010 },
+        "incident_lead": { "median_time_s": 640 }
+      }
+    },
+    "/incident": {
+      "sessions": 910,
+      "median_time_s": 520,
+      "exit_rate": 0.14,
+      "events": {
+        "click_disabled_isolate": { "count": 780, "by_role": { "analyst": 760, "incident_lead": 0, "viewer": 20 } }
       }
     }
   },
   "feedback": [
-    { "screen": "/compare", "role": "finance_manager", "text": "I keep flipping between tabs and writing numbers on paper to see what changed." },
-    { "screen": "/scenarios/edit", "role": "analyst", "text": "Why can't I edit Base? Annoying." },
+    { "screen": "/alerts", "role": "analyst", "text": "I open 40 alerts to find the 3 that matter. Half are the same PowerShell alert on a test box." },
+    { "screen": "/alerts", "role": "incident_lead", "text": "The DC credential dump sat in the queue for 20 minutes under a pile of low-severity noise." },
+    { "screen": "/incident", "role": "analyst", "text": "Why can't I just isolate the host myself? Waiting for a lead is annoying." },
     { "screen": "/overview", "role": "viewer", "text": "The grey subtitle is hard to read on my laptop." }
   ]
 }
