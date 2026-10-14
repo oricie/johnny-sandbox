@@ -6,7 +6,8 @@
     "observe": "tsx src/observe/cli.ts",
     "run": "tsx src/run.ts",
     "typecheck": "tsc --noEmit",
-    "eval": "tsx src/eval.ts"
+    "eval": "tsx src/eval.ts",
+    "target": "tsx src/target/run.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",

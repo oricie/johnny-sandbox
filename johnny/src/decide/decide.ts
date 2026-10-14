@@ -29,7 +29,7 @@ export interface Decision {
   request?: { text: string; verdict: "proceed" | "push_back"; explanation: string };
 }
 
-const SCHEMA = {
+export const DECISION_SCHEMA = {
   type: "object",
   additionalProperties: false,
   required: ["findings", "chosen_finding", "options", "recommendation", "constraints_respected"],
@@ -110,15 +110,15 @@ export async function decide(packs: EvidencePack[]): Promise<Decision> {
   return structured<Decision>(
     SYSTEM,
     `Evidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}`,
-    SCHEMA,
+    DECISION_SCHEMA,
   );
 }
 
 const REQUEST_SCHEMA = {
-  ...SCHEMA,
-  required: [...SCHEMA.required, "request_verdict"],
+  ...DECISION_SCHEMA,
+  required: [...DECISION_SCHEMA.required, "request_verdict"],
   properties: {
-    ...SCHEMA.properties,
+    ...DECISION_SCHEMA.properties,
     request_verdict: {
       type: "object", additionalProperties: false, required: ["verdict", "explanation"],
       properties: { verdict: { type: "string", enum: ["proceed", "push_back"] }, explanation: { type: "string" } },
