@@ -38,7 +38,9 @@ act       --act: per option, a git worktree on johnny/option-<id>; Claude writes
           constraints are re-checked, typecheck + build run (one repair round), then commit
 verify    each branch is built and served; Playwright screenshots the chosen screen, before / A / B
 thread    out/thread.html: a Slack-style thread with evidence, screenshots and Approve buttons (page only)
-slack     (next) Bolt app in Socket Mode posting the payload and handling buttons
+slack     npm run slack: Bolt app in Socket Mode (slack/manifest.json). /johnny review, /johnny <request>,
+          @Johnny <request or question>; posts the finding, buttons and screenshots in the thread;
+          Approve pushes the option's branch; messages in invited channels go to out/slack-inbox.jsonl
 ```
 
 ## Run

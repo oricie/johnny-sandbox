@@ -13,6 +13,7 @@
     "johnny": "npm run run -w johnny --",
     "typecheck": "npm run typecheck -w demo-app && npm run typecheck -w johnny",
     "eval": "npm run eval -w johnny --",
-    "target": "npm run target -w johnny --"
+    "target": "npm run target -w johnny --",
+    "slack": "npm run slack -w johnny"
   }
 }

@@ -7,10 +7,12 @@
     "run": "tsx src/run.ts",
     "typecheck": "tsc --noEmit",
     "eval": "tsx src/eval.ts",
-    "target": "tsx src/target/run.ts"
+    "target": "tsx src/target/run.ts",
+    "slack": "tsx src/slack/bot.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
+    "@slack/bolt": "^4.7.3",
     "ts-morph": "^28.0.0"
   },
   "devDependencies": {

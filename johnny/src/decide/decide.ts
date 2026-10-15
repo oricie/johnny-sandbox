@@ -137,7 +137,9 @@ A teammate asked for a change. Treat it like a design brief, not an order.
 - Put the ask itself as the chosen finding (screen it affects, evidence for or against it). Add other
   findings only if they bear directly on the ask (for example a decision it collides with).
 - Every claim cites a source you were given. Options may only change files under
-  demo-app/src/components, demo-app/src/screens or demo-app/src/styles, using the design system.`;
+  demo-app/src/components, demo-app/src/screens or demo-app/src/styles, using the design system.
+- Write all human-readable text (titles, reasons, claims, options, explanation) in the same language
+  as the teammate's request. Keep file paths, ids and code in English.`;
 
 export async function decideRequest(packs: EvidencePack[], text: string): Promise<Decision> {
   const d = await structured<Decision & { request_verdict: { verdict: "proceed" | "push_back"; explanation: string } }>(
