@@ -1,0 +1,17 @@
+{
+  "source": "gong",
+  "id": "gong-9034",
+  "title": "Acme Logistics: renewal call",
+  "date": "2026-10-02",
+  "account": "Acme Logistics",
+  "participants": [
+    { "name": "Dev Patel", "role": "Security engineer", "company": "Acme Logistics" },
+    { "name": "Noa Levi", "role": "Account manager", "company": "Sentinel" }
+  ],
+  "transcript": [
+    { "speaker": "Dev Patel", "text": "We're renewing, but the email alerts are a problem. A phishing alert just says the user clicked a link. It doesn't show the sender or the subject, so every single one I have to go to the mail gateway to understand it." },
+    { "speaker": "Noa Levi", "text": "How many of those do you get?" },
+    { "speaker": "Dev Patel", "text": "Twenty, thirty a day. It's the most annoying part of the product for us." },
+    { "speaker": "Dev Patel", "text": "The duplicate PowerShell thing from test runners is also noisy, but we just learned to ignore it." }
+  ]
+}

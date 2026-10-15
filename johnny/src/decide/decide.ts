@@ -96,6 +96,9 @@ Rules:
 - Every claim cites a source: a repo-relative file path (with line if useful), a knowledge id like
   "decisions.md#D-12", or an analytics path like analytics.json#screens["/compare"]. Cite only sources you were given.
 - Some friction is intentional. If a product decision explains a signal, mark it do_not_change and say which decision.
+- Knowledge ids starting with "learned#" are what you learned from customer calls, tickets, research and
+  Slack. Use them as evidence and cite them. An "OPEN CONFLICT" means a written decision may be out of
+  date: do not act on the unconfirmed side, and say the conflict must be resolved by a person first.
 - Propose exactly two options, A and B, that take different approaches to the root cause, not two styles of the same idea.
 - Options may only change files under demo-app/src/components, demo-app/src/screens or demo-app/src/styles.
   Use existing components and tokens from the design system.`;

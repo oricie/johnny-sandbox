@@ -1,0 +1,689 @@
+{
+  "updated": "2026-10-15T11:47:14.715Z",
+  "processed": [
+    "gong-8812",
+    "gong-9034",
+    "ut-2026-09-24",
+    "slack:#product:2026-10-08",
+    "ZD-4411",
+    "ZD-4462",
+    "ZD-4490",
+    "ZD-4527",
+    "ZD-4551"
+  ],
+  "entries": [
+    {
+      "id": "K-001",
+      "type": "pain",
+      "title": "Critical alerts get buried under low-severity noise in the alert queue",
+      "statement": "The alert queue carries high volume with few relevant alerts, and critical alerts on important assets end up below large numbers of low-severity alerts. In one case a critical alert waited 40 minutes at night.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "Honestly the queue is the pain. On a bad day we get two, three hundred alerts and maybe ten matter.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "gong-8812",
+          "quote": "A low on a test box should never be above a critical on a domain controller.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ZD-4411",
+          "quote": "A critical alert on our file server sat in the queue for 40 minutes on the night shift.",
+          "who": "SOC analyst, Northwind Health",
+          "date": "2026-09-04"
+        },
+        {
+          "source": "ZD-4411",
+          "quote": "It was below 60 low alerts from a scanner.",
+          "who": "SOC analyst, Northwind Health",
+          "date": "2026-09-04"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-04",
+      "last_seen": "2026-09-18"
+    },
+    {
+      "id": "K-002",
+      "type": "request",
+      "title": "Sort the alert queue by danger, not arrival time",
+      "statement": "Customers want the queue to show the most dangerous alerts first, based on severity and the affected asset, rather than ordered by time.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "For me, show me what's dangerous first. Sort by what it hits, not when it came in.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ZD-4411",
+          "quote": "Can the queue show critical first?",
+          "who": "SOC analyst, Northwind Health",
+          "date": "2026-09-04"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-04",
+      "last_seen": "2026-09-18"
+    },
+    {
+      "id": "K-003",
+      "type": "request",
+      "title": "Show whether the affected asset is test or production",
+      "statement": "Analysts want an asset column indicating whether the affected machine is test or production, as the first thing they check.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "ut-2026-09-24",
+          "quote": "I need to know if it's a test box or production before anything else.",
+          "who": "P2, analyst (usability test participant)",
+          "date": "2026-09-24"
+        }
+      ],
+      "accounts": [],
+      "strength": "single",
+      "first_seen": "2026-09-24",
+      "last_seen": "2026-09-24"
+    },
+    {
+      "id": "K-004",
+      "type": "behaviour",
+      "title": "Analysts scan the queue by time and overlook severity",
+      "statement": "In usability testing, 4 of 5 analysts scanned the queue top to bottom by time (median 74 seconds to find the critical alert) and 3 of 5 did not look at the Severity column until prompted.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "ut-2026-09-24",
+          "quote": "4 of 5 scanned the queue top to bottom by time. Median 74 seconds to find the critical alert.",
+          "who": "4 of 5 analysts (usability test participants)",
+          "date": "2026-09-24"
+        },
+        {
+          "source": "ut-2026-09-24",
+          "quote": "3 of 5 did not look at the Severity column at all until prompted.",
+          "who": "3 of 5 analysts (usability test participants)",
+          "date": "2026-09-24"
+        }
+      ],
+      "accounts": [],
+      "strength": "single",
+      "first_seen": "2026-09-24",
+      "last_seen": "2026-09-24"
+    },
+    {
+      "id": "K-005",
+      "type": "pain",
+      "title": "Severity column is visually indistinguishable",
+      "statement": "The Severity column reads as uniform grey text, so analysts don't notice it.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "ut-2026-09-24",
+          "quote": "Oh, there's a severity column? It's all the same grey text.",
+          "who": "P3, analyst (usability test participant)",
+          "date": "2026-09-24"
+        }
+      ],
+      "accounts": [],
+      "strength": "single",
+      "first_seen": "2026-09-24",
+      "last_seen": "2026-09-24"
+    },
+    {
+      "id": "K-006",
+      "type": "pain",
+      "title": "Duplicate PowerShell alerts from test/CI runners flood the queue",
+      "statement": "The same PowerShell alert from test or CI runners fires dozens of times a day, creating noise in the alert queue.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-9034",
+          "quote": "The duplicate PowerShell thing from test runners is also noisy",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        },
+        {
+          "source": "ZD-4462",
+          "quote": "We get the same PowerShell alert from our CI runners dozens of times a day.",
+          "who": "SOC analyst, Brightline Bank",
+          "date": "2026-09-11"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics",
+        "Brightline Bank"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-11",
+      "last_seen": "2026-10-02"
+    },
+    {
+      "id": "K-007",
+      "type": "behaviour",
+      "title": "Analysts waste time on, or learn to ignore, duplicate alerts",
+      "statement": "Analysts spend time opening duplicate alerts individually (up to the first hour of a shift) or have learned to ignore them altogether.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "My analysts spend the first hour of every shift clicking through duplicates.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ut-2026-09-24",
+          "quote": "2 of 5 opened two duplicate PowerShell alerts before realising they were the same.",
+          "who": "2 of 5 analysts (usability test participants)",
+          "date": "2026-09-24"
+        },
+        {
+          "source": "gong-9034",
+          "quote": "but we just learned to ignore it.",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        }
+      ],
+      "accounts": [
+        "Northwind Health",
+        "Acme Logistics"
+      ],
+      "strength": "widespread",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-10-02"
+    },
+    {
+      "id": "K-008",
+      "type": "request",
+      "title": "Group duplicate alerts into one row with a count",
+      "statement": "Users want duplicate alerts grouped into a single row with a count.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "ut-2026-09-24",
+          "quote": "I wish these were one row with a count.",
+          "who": "P5, analyst (usability test participant)",
+          "date": "2026-09-24"
+        },
+        {
+          "source": "ZD-4462",
+          "quote": "Is there a way to group them?",
+          "who": "SOC analyst, Brightline Bank",
+          "date": "2026-09-11"
+        }
+      ],
+      "accounts": [
+        "Brightline Bank"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-11",
+      "last_seen": "2026-09-24"
+    },
+    {
+      "id": "K-009",
+      "type": "fact",
+      "title": "Test runners produce about half of alert volume",
+      "statement": "According to the PM, test runners account for about half of alert volume.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-10-08",
+          "quote": "test runners are half our alert volume",
+          "who": "Maya (PM)",
+          "date": "2026-10-08"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-08",
+      "last_seen": "2026-10-08"
+    },
+    {
+      "id": "K-010",
+      "type": "fact",
+      "title": "Customers cannot turn off noisy alerts because audit needs them",
+      "statement": "Duplicate alerts cannot be disabled because they are required for audit, consistent with D-07.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "ZD-4462",
+          "quote": "We can't turn them off, audit needs them.",
+          "who": "SOC analyst, Brightline Bank",
+          "date": "2026-09-11"
+        }
+      ],
+      "accounts": [
+        "Brightline Bank"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-11",
+      "last_seen": "2026-09-11"
+    },
+    {
+      "id": "K-011",
+      "type": "pain",
+      "title": "Phishing alerts lack sender and subject",
+      "statement": "Phishing alerts only say the user clicked a link and do not show the email sender or subject; the customer calls it the most annoying part of the product.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-9034",
+          "quote": "A phishing alert just says the user clicked a link. It doesn't show the sender or the subject",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        },
+        {
+          "source": "gong-9034",
+          "quote": "It's the most annoying part of the product for us.",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        },
+        {
+          "source": "ZD-4490",
+          "quote": "The phishing alert has no sender address or subject line.",
+          "who": "Security engineer, Acme Logistics",
+          "date": "2026-09-15"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-15",
+      "last_seen": "2026-10-02"
+    },
+    {
+      "id": "K-012",
+      "type": "behaviour",
+      "title": "Users leave the product to look up phishing details in the mail gateway",
+      "statement": "For every phishing alert, the security team looks up email details in their mail gateway.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-9034",
+          "quote": "so every single one I have to go to the mail gateway to understand it.",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        },
+        {
+          "source": "ZD-4490",
+          "quote": "we have to look everything up in the mail gateway.",
+          "who": "Security engineer, Acme Logistics",
+          "date": "2026-09-15"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-15",
+      "last_seen": "2026-10-02"
+    },
+    {
+      "id": "K-013",
+      "type": "request",
+      "title": "Add sender and subject to phishing alert details",
+      "statement": "Customer asks for sender address and subject line in phishing alert details.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "ZD-4490",
+          "quote": "Please add them",
+          "who": "Security engineer, Acme Logistics",
+          "date": "2026-09-15"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-15",
+      "last_seen": "2026-09-15"
+    },
+    {
+      "id": "K-014",
+      "type": "fact",
+      "title": "Acme Logistics gets 20-30 phishing alerts a day",
+      "statement": "Acme Logistics receives 20-30 phishing email alerts per day.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "gong-9034",
+          "quote": "Twenty, thirty a day.",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-02",
+      "last_seen": "2026-10-02"
+    },
+    {
+      "id": "K-015",
+      "type": "fact",
+      "title": "Acme Logistics is renewing",
+      "statement": "Acme Logistics is renewing, while flagging email alerts as a problem.",
+      "screens": [],
+      "evidence": [
+        {
+          "source": "gong-9034",
+          "quote": "We're renewing, but the email alerts are a problem.",
+          "who": "Dev Patel (Security engineer, Acme Logistics)",
+          "date": "2026-10-02"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-02",
+      "last_seen": "2026-10-02"
+    },
+    {
+      "id": "K-016",
+      "type": "fact",
+      "title": "CISO regularly reports security posture to the board",
+      "statement": "The Northwind Health CISO explains security posture to the board using slide decks; cadence is stated as monthly in one source and weekly posture in another.",
+      "screens": [
+        "/overview"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "I have a board meeting every month where I have to explain our posture.",
+          "who": "Rachel Kim (CISO, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ZD-4551",
+          "quote": "the weekly posture I can put in a board deck",
+          "who": "CISO, Northwind Health",
+          "date": "2026-09-29"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-09-29"
+    },
+    {
+      "id": "K-017",
+      "type": "behaviour",
+      "title": "CISO spends half a day screenshotting the product into slides",
+      "statement": "The CISO builds board reports by taking screenshots and pasting them into slides, taking half a day.",
+      "screens": [
+        "/overview"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "Right now I take screenshots from Sentinel and paste them into slides. It takes me half a day.",
+          "who": "Rachel Kim (CISO, Northwind Health)",
+          "date": "2026-09-18"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-09-18"
+    },
+    {
+      "id": "K-018",
+      "type": "request",
+      "title": "Board-ready posture summary or export",
+      "statement": "The CISO wants an exportable, plain-language posture summary for the board: what happened, whether important systems are safe, and whether response is getting faster.",
+      "screens": [
+        "/overview"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "Something I can hand to the board. Plain language. What happened, are our important systems safe, are we getting faster.",
+          "who": "Rachel Kim (CISO, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ZD-4551",
+          "quote": "Is there an export of the weekly posture I can put in a board deck?",
+          "who": "CISO, Northwind Health",
+          "date": "2026-09-29"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-09-29"
+    },
+    {
+      "id": "K-019",
+      "type": "pain",
+      "title": "Containment stalls when no incident lead is available",
+      "statement": "Because only leads can isolate, containment waits when a lead is offline or busy: 25 minutes lost at Brightline, night-shift waits at Northwind, and an internal analyst isolated nothing for two weeks.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "When a lead isn't around at night, we wait.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ZD-4527",
+          "quote": "Our lead was offline and we lost 25 minutes.",
+          "who": "Analyst, Brightline Bank",
+          "date": "2026-09-22"
+        },
+        {
+          "source": "slack:#product:2026-10-08",
+          "quote": "I isolated nothing in two weeks because the lead was always busy with prod.",
+          "who": "Dana (analyst)",
+          "date": "2026-10-08"
+        }
+      ],
+      "accounts": [
+        "Northwind Health",
+        "Brightline Bank",
+        "internal"
+      ],
+      "strength": "widespread",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-10-08"
+    },
+    {
+      "id": "K-020",
+      "type": "pain",
+      "title": "Disabled Isolate button doesn't explain why",
+      "statement": "Analysts see the Isolate button greyed out without understanding why; 4 of 5 hovered it but only 1 noticed the tooltip, and it can be read as broken.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "ut-2026-09-24",
+          "quote": "On the incident screen, 4 of 5 hovered the disabled Isolate button; only 1 noticed the tooltip.",
+          "who": "4 of 5 analysts (usability test participants)",
+          "date": "2026-09-24"
+        },
+        {
+          "source": "ut-2026-09-24",
+          "quote": "Why is it grey? Is it broken?",
+          "who": "P4, analyst (usability test participant)",
+          "date": "2026-09-24"
+        },
+        {
+          "source": "ZD-4527",
+          "quote": "The isolate button is greyed out for me.",
+          "who": "Analyst, Brightline Bank",
+          "date": "2026-09-22"
+        }
+      ],
+      "accounts": [
+        "Brightline Bank"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-22",
+      "last_seen": "2026-09-24"
+    },
+    {
+      "id": "K-021",
+      "type": "request",
+      "title": "Show analysts which lead is on call for containment",
+      "statement": "Analysts don't know who to ask when containment is needed; customers want the on-call lead shown so analysts can contact them.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "But tell the analyst who is on call so they can ping them.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        },
+        {
+          "source": "ZD-4527",
+          "quote": "Who can I ask?",
+          "who": "Analyst, Brightline Bank",
+          "date": "2026-09-22"
+        }
+      ],
+      "accounts": [
+        "Northwind Health",
+        "Brightline Bank"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-09-22"
+    },
+    {
+      "id": "K-022",
+      "type": "fact",
+      "title": "Customer accepts the containment lock",
+      "statement": "Northwind Health's SOC lead understands why containment is restricted to leads, citing their own past incident.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "gong-8812",
+          "quote": "I get why containment is locked, we had our own incident like that years ago.",
+          "who": "Tom Avery (SOC lead, Northwind Health)",
+          "date": "2026-09-18"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-18",
+      "last_seen": "2026-09-18"
+    },
+    {
+      "id": "K-023",
+      "type": "request",
+      "title": "Let analysts isolate test-tagged assets",
+      "statement": "An incident lead proposed allowing analysts to isolate assets tagged test without a lead, arguing test assets cannot take production down.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-10-08",
+          "quote": "Proposal: for assets tagged test, analysts should be able to isolate without waiting for a lead. Nothing in test can take production down.",
+          "who": "Omer (incident lead)",
+          "date": "2026-10-08"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-08",
+      "last_seen": "2026-10-08"
+    },
+    {
+      "id": "K-024",
+      "type": "decision",
+      "title": "Analysts may isolate test assets (Slack decision, not in decision log)",
+      "statement": "The PM decided in Slack that analysts can isolate test-tagged assets without lead approval, planned for next sprint, and said the decision log would be updated. It has not been.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-10-08",
+          "quote": "Decided: analysts can isolate test assets. I'll update the decision log.",
+          "who": "Maya (PM)",
+          "date": "2026-10-08"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-08",
+      "last_seen": "2026-10-08"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "C-001",
+      "decision": "D-12",
+      "entry": "K-024",
+      "summary": "D-12 (active) says only incident leads may run containment and forbids enabling the button for analysts or bypassing the API check. On 2026-10-08 the PM decided in Slack that analysts can isolate test-tagged assets, but D-12 has not been updated and has no test-asset exception.",
+      "question": "Is D-12 being amended to let analysts isolate test-tagged assets? If so, who approves the change, how is 'test' tagging verified so a mis-tagged production host can't be isolated, and will the decision log be updated before any work starts?",
+      "status": "open"
+    }
+  ]
+}

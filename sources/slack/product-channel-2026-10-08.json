@@ -1,0 +1,11 @@
+{
+  "source": "slack",
+  "channel": "#product",
+  "date": "2026-10-08",
+  "messages": [
+    { "user": "Omer (incident lead)", "ts": "2026-10-08T09:12:00Z", "text": "Proposal: for assets tagged test, analysts should be able to isolate without waiting for a lead. Nothing in test can take production down." },
+    { "user": "Maya (PM)", "ts": "2026-10-08T09:20:00Z", "text": "Makes sense to me, test runners are half our alert volume. Let's do it next sprint." },
+    { "user": "Dana (analyst)", "ts": "2026-10-08T09:31:00Z", "text": "+1, I isolated nothing in two weeks because the lead was always busy with prod." },
+    { "user": "Maya (PM)", "ts": "2026-10-08T09:40:00Z", "text": "Decided: analysts can isolate test assets. I'll update the decision log." }
+  ]
+}

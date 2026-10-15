@@ -12,7 +12,38 @@ function parseScope(raw: string | undefined): string[] {
 
 // Markdown files with frontmatter. decisions.md is split into one doc per "## D-xx" section,
 // each with its own `scope:` line, so a rule is attached to exactly the files it governs.
+// What Johnny learned from calls, tickets, research and Slack (knowledge/learned.json), as docs
+// scoped to the screens they concern. Open conflicts with written decisions are included too.
+function learnedDocs(): KnowledgeDoc[] {
+  const file = path.join(ROOT, "knowledge", "learned.json");
+  if (!fs.existsSync(file)) return [];
+  const k = JSON.parse(fs.readFileSync(file, "utf8"));
+  const app = fs.readFileSync(path.join(ROOT, "demo-app/src/App.tsx"), "utf8");
+  // Route -> screen file, from the route table and its imports.
+  const screenFile = (route: string) => {
+    const screen = new RegExp(`path:\\s*"${route.replace(/[/]/g, "\\/")}",\\s*screen:\\s*(\\w+)`).exec(app)?.[1];
+    const from = screen && new RegExp(`import \\{ ${screen} \\} from "\\./(.+?)"`).exec(app)?.[1];
+    return from ? [`demo-app/src/${from}.tsx`] : [];
+  };
+  const entries = (k.entries ?? []).map((e: any): KnowledgeDoc => ({
+    id: `learned#${e.id}`, type: `learned-${e.type}`, title: `${e.title} (${e.strength}, ${e.evidence.length} sources)`,
+    scope: e.screens.flatMap(screenFile).concat(e.screens.length ? [] : ["demo-app/**"]),
+    body: `${e.statement}\nAccounts: ${e.accounts.join(", ") || "-"}. Seen ${e.first_seen} to ${e.last_seen}.\n` +
+      e.evidence.map((v: any) => `- "${v.quote}" (${v.who}, ${v.source}, ${v.date})`).join("\n"),
+  }));
+  const conflicts = (k.conflicts ?? []).filter((c: any) => c.status === "open").map((c: any): KnowledgeDoc => {
+    const entry = (k.entries ?? []).find((e: any) => e.id === c.entry);
+    return { id: `learned#${c.id}`, type: "conflict", title: `OPEN CONFLICT: ${c.decision} vs ${c.entry}`,
+      scope: (entry?.screens ?? []).flatMap(screenFile), body: `${c.summary}\nUnanswered question: ${c.question}` };
+  });
+  return [...entries, ...conflicts];
+}
+
 export function loadKnowledge(): KnowledgeDoc[] {
+  return [...writtenKnowledge(), ...learnedDocs()];
+}
+
+function writtenKnowledge(): KnowledgeDoc[] {
   const docs: KnowledgeDoc[] = [];
   for (const name of fs.readdirSync(CONTEXT).filter((f) => f.endsWith(".md"))) {
     const text = fs.readFileSync(path.join(CONTEXT, name), "utf8");

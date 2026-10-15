@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "eval": "tsx src/eval.ts",
     "target": "tsx src/target/run.ts",
-    "slack": "tsx src/slack/bot.ts"
+    "slack": "tsx src/slack/bot.ts",
+    "learn": "tsx src/learn/cli.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",

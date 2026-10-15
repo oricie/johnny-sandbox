@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process";
 import { ROOT, OUT } from "../paths";
 import { buildCodeGraph } from "../observe/codeGraph";
 import { loadKnowledge } from "../observe/knowledge";
+import { learn, loadLearned } from "../learn/learn";
 
 // What Johnny can look at or start during a conversation. Reading is limited to the product,
 // its context and the guardrails; starting work goes through the same pipeline as everything else.
@@ -38,6 +39,17 @@ export const TOOL_DEFS = [
     name: "team_chatter",
     description: "The latest messages people wrote in Slack channels you are invited to (what you've heard so far).",
     input_schema: { type: "object", additionalProperties: false, required: [], properties: { limit: { type: "integer" } } },
+  },
+  {
+    name: "learned",
+    description: "What you learned from customer calls (Gong), support tickets (Zendesk), usability research and Slack: knowledge entries with quotes, accounts and strength, and open conflicts with written decisions. Filter by screen route and/or a search term.",
+    input_schema: { type: "object", additionalProperties: false, required: [],
+      properties: { screen: { type: "string", description: "e.g. /alerts" }, query: { type: "string" } } },
+  },
+  {
+    name: "learn_now",
+    description: "Read new sources (calls, tickets, research, and what you heard in Slack) and update your knowledge. Takes about a minute. Use when asked to learn or catch up, or when new material was shared.",
+    input_schema: { type: "object", additionalProperties: false, properties: {}, required: [] },
   },
   {
     name: "status",
@@ -108,6 +120,21 @@ export async function runTool(name: string, input: Record<string, unknown>, hook
       if (!fs.existsSync(f)) return "Nothing heard yet.";
       const n = Math.min(Number(input.limit ?? 20), 100);
       return fs.readFileSync(f, "utf8").trim().split("\n").slice(-n).join("\n");
+    }
+    case "learned": {
+      const k = loadLearned();
+      const q = String(input.query ?? "").toLowerCase();
+      const screen = String(input.screen ?? "");
+      const entries = k.entries.filter((e) => (!screen || e.screens.includes(screen)) &&
+        (!q || JSON.stringify(e).toLowerCase().includes(q)));
+      return JSON.stringify({ updated: k.updated, sources_read: k.processed.length,
+        conflicts: k.conflicts.filter((c) => c.status === "open"), entries }, null, 1).slice(0, 30_000);
+    }
+    case "learn_now": {
+      const r = await learn();
+      return JSON.stringify({ new_sources: r.newSources, new_entries: r.newEntries, new_conflicts: r.newConflicts,
+        open_conflicts: r.knowledge.conflicts.filter((c) => c.status === "open"),
+        entries: r.knowledge.entries.map((e) => `${e.id} [${e.type}, ${e.strength}] ${e.title}`) });
     }
     case "status":
       return JSON.stringify(hooks.status());

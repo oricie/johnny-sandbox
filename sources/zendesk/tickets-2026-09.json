@@ -1,0 +1,11 @@
+{
+  "source": "zendesk",
+  "export": "2026-09",
+  "tickets": [
+    { "id": "ZD-4411", "date": "2026-09-04", "account": "Northwind Health", "requester_role": "SOC analyst", "subject": "Critical alert missed overnight", "body": "A critical alert on our file server sat in the queue for 40 minutes on the night shift. It was below 60 low alerts from a scanner. Can the queue show critical first?", "tags": ["alert-queue", "severity"] },
+    { "id": "ZD-4462", "date": "2026-09-11", "account": "Brightline Bank", "requester_role": "SOC analyst", "subject": "Same alert 30 times", "body": "We get the same PowerShell alert from our CI runners dozens of times a day. Is there a way to group them? We can't turn them off, audit needs them.", "tags": ["alert-queue", "duplicates"] },
+    { "id": "ZD-4490", "date": "2026-09-15", "account": "Acme Logistics", "requester_role": "Security engineer", "subject": "Phishing alert missing details", "body": "The phishing alert has no sender address or subject line. Please add them, we have to look everything up in the mail gateway.", "tags": ["email", "alert-details"] },
+    { "id": "ZD-4527", "date": "2026-09-22", "account": "Brightline Bank", "requester_role": "Analyst", "subject": "Why can't I isolate?", "body": "The isolate button is greyed out for me. Our lead was offline and we lost 25 minutes. Who can I ask?", "tags": ["incident", "containment"] },
+    { "id": "ZD-4551", "date": "2026-09-29", "account": "Northwind Health", "requester_role": "CISO", "subject": "Export for board", "body": "Is there an export of the weekly posture I can put in a board deck?", "tags": ["overview", "reporting"] }
+  ]
+}

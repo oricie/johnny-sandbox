@@ -1,0 +1,21 @@
+{
+  "source": "gong",
+  "id": "gong-8812",
+  "title": "Northwind Health: quarterly review",
+  "date": "2026-09-18",
+  "account": "Northwind Health",
+  "participants": [
+    { "name": "Rachel Kim", "role": "CISO", "company": "Northwind Health" },
+    { "name": "Tom Avery", "role": "SOC lead", "company": "Northwind Health" },
+    { "name": "Noa Levi", "role": "Account manager", "company": "Sentinel" }
+  ],
+  "transcript": [
+    { "speaker": "Noa Levi", "text": "How has the last quarter been for the team?" },
+    { "speaker": "Tom Avery", "text": "Honestly the queue is the pain. On a bad day we get two, three hundred alerts and maybe ten matter. My analysts spend the first hour of every shift clicking through duplicates." },
+    { "speaker": "Rachel Kim", "text": "And I have a board meeting every month where I have to explain our posture. Right now I take screenshots from Sentinel and paste them into slides. It takes me half a day." },
+    { "speaker": "Noa Levi", "text": "What would help most?" },
+    { "speaker": "Rachel Kim", "text": "Something I can hand to the board. Plain language. What happened, are our important systems safe, are we getting faster." },
+    { "speaker": "Tom Avery", "text": "For me, show me what's dangerous first. Sort by what it hits, not when it came in. A low on a test box should never be above a critical on a domain controller." },
+    { "speaker": "Tom Avery", "text": "One more thing. When a lead isn't around at night, we wait. I get why containment is locked, we had our own incident like that years ago. But tell the analyst who is on call so they can ping them." }
+  ]
+}
