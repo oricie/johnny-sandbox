@@ -12,6 +12,7 @@ const READABLE = ["context/", "demo-app/src/", "demo-api/src/", "constraints.jso
 export interface AgentHooks {
   startRun: (request?: string) => Promise<string>; // starts a review or request run; results go to the thread
   startPrototype: (brief: string, variants: number) => Promise<string>; // exploration prototypes; results go to the thread
+  sketch: (change: string, route: string) => Promise<string>; // quick visual mockup, posted to the thread
   status: () => Record<string, unknown>;
 }
 
@@ -53,6 +54,15 @@ export const TOOL_DEFS = [
     description: "Start work on a specific change the person asked for: check it against decisions, propose two options (or push back with alternatives), build, check and screenshot. Images attached in this thread are passed along automatically, and the result is compared against them. Takes 2-3 minutes; results are posted to this thread. Only when the person clearly wants the change built, not when they are still discussing.",
     input_schema: { type: "object", additionalProperties: false, required: ["request"],
       properties: { request: { type: "string", description: "The change, written as a clear brief including what was agreed in this conversation" } } },
+  },
+  {
+    name: "sketch",
+    description: "Quick visual sketch (about 30 seconds) of how a screen would look after a change: edits the screen's real HTML and posts a screenshot to the thread. Static, no checks, nothing built. Use it to show a visual change before spending minutes on a full build, then ask whether to build it.",
+    input_schema: { type: "object", additionalProperties: false, required: ["change", "route"],
+      properties: {
+        change: { type: "string", description: "The visual change, concretely" },
+        route: { type: "string", description: "Screen route, e.g. /alerts, /incident, /overview" },
+      } },
   },
   {
     name: "start_prototype",
@@ -105,6 +115,8 @@ export async function runTool(name: string, input: Record<string, unknown>, hook
       return hooks.startRun();
     case "start_request":
       return hooks.startRun(String(input.request ?? ""));
+    case "sketch":
+      return hooks.sketch(String(input.change ?? ""), String(input.route ?? "/alerts"));
     case "start_prototype":
       return hooks.startPrototype(String(input.brief ?? ""), Number(input.variants ?? 3));
     default:

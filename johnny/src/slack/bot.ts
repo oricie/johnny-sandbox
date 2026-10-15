@@ -7,6 +7,7 @@ import { OUT, ROOT } from "../paths";
 import { runJohnny, type RunResult } from "../pipeline";
 import { reply, type Turn } from "../agent/agent";
 import { prototype } from "../prototype";
+import { sketch } from "../sketch";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
@@ -190,6 +191,12 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
       if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
       void run(client, channel, thread, request);
       return "Started. Progress and results will be posted in this thread in 2-3 minutes.";
+    },
+    sketch: async (change, route) => {
+      const s = await sketch(change, route, threadImages.get(thread) ?? []);
+      await client.files.uploadV2({ channel_id: channel, thread_ts: thread, initial_comment: `✏️ Sketch: ${s.notes}`,
+        file_uploads: [{ file: s.file, filename: "sketch.png" }] });
+      return `Sketch posted in the thread. What you changed: ${s.notes}. Ask whether to build it (a full build with two options takes 2-3 minutes).`;
     },
     startPrototype: async (brief, variants) => {
       if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
