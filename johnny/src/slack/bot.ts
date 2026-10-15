@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { App, type SayFn } from "@slack/bolt";
+import { App, Assistant, type SayFn } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import { OUT, ROOT } from "../paths";
 import { runJohnny, type RunResult } from "../pipeline";
@@ -15,6 +15,7 @@ import { loadKnowledge } from "../observe/knowledge";
 //   /johnny <request>         -> request mode
 //   @Johnny <request>         -> request mode, answered in the thread
 //   @Johnny why ...? / למה...? -> answers from what he knows
+//   Agent pane (DM)           -> same, in Slack's assistant threads
 // Messages in channels he's invited to are kept in out/slack-inbox.jsonl for later learning.
 const botToken = process.env.JOHNNY_SLACK_BOT_TOKEN;
 const appToken = process.env.JOHNNY_SLACK_APP_TOKEN;
@@ -125,6 +126,25 @@ app.action(/^(approve_a|approve_b|revise)$/, async ({ ack, action, body, client 
     await client.chat.postMessage({ channel, thread_ts: thread, text: `Approved, but pushing the branch failed: ${(e as Error).message.slice(0, 300)}` });
   }
 });
+
+// Agent: Slack's assistant pane. Each conversation is its own thread.
+app.assistant(new Assistant({
+  threadStarted: async ({ say, setSuggestedPrompts }) => {
+    await say("Hi, I'm Johnny. I know Sentinel's code, decisions and usage data. Ask me something, give me a change, or say *review*.");
+    await setSuggestedPrompts({ prompts: [
+      { title: "Review the product", message: "review" },
+      { title: "Why is containment locked?", message: "Why can only an incident lead isolate a host?" },
+      { title: "Request a change", message: "Add a way to filter the alert queue by source" },
+    ] });
+  },
+  userMessage: async ({ message, client, say, setStatus, setTitle }) => {
+    const m = message as { text?: string; channel: string; thread_ts?: string; ts: string };
+    if (!m.text) return;
+    await setTitle(m.text.slice(0, 60));
+    await setStatus("is thinking…");
+    await handle(m.text, client, m.channel, m.thread_ts ?? m.ts, say);
+  },
+}));
 
 // Listening: keep what people say in channels Johnny was invited to, for the learning step.
 app.message(async ({ message }) => {

@@ -16,7 +16,29 @@
         "usage_hint": "review | <your request>",
         "should_escape": false
       }
-    ]
+    ],
+    "assistant_view": {
+      "assistant_description": "Johnny learns from your product, code and team conversations, finds what to improve, and builds it.",
+      "suggested_prompts": [
+        {
+          "title": "Review the product",
+          "message": "review"
+        },
+        {
+          "title": "Why is containment locked?",
+          "message": "Why can only an incident lead isolate a host?"
+        },
+        {
+          "title": "Request a change",
+          "message": "Add a way to filter the alert queue by source"
+        }
+      ]
+    },
+    "app_home": {
+      "home_tab_enabled": false,
+      "messages_tab_enabled": true,
+      "messages_tab_read_only_enabled": false
+    }
   },
   "oauth_config": {
     "scopes": {
@@ -30,7 +52,11 @@
         "groups:read",
         "files:write",
         "reactions:write",
-        "users:read"
+        "users:read",
+        "assistant:write",
+        "im:history",
+        "im:read",
+        "im:write"
       ]
     }
   },
@@ -39,7 +65,10 @@
       "bot_events": [
         "app_mention",
         "message.channels",
-        "message.groups"
+        "message.groups",
+        "assistant_thread_started",
+        "assistant_thread_context_changed",
+        "message.im"
       ]
     },
     "interactivity": {
