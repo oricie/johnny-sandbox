@@ -44,19 +44,19 @@ async function run(client: WebClient, channel: string, thread: string, request?:
       },
     });
     runs.set(thread, result);
-    const { decision, results, beforeShot } = result;
+    const { decision, results, beforeShot, beforePreview } = result;
     const citations = checkCitations(decision, loadKnowledge());
 
     const verdict = decision.request
       ? [{ type: "section", text: { type: "mrkdwn", text: `${decision.request.verdict === "push_back" ? "✋" : "👍"} ${decision.request.explanation}` } }]
       : [];
-    const outcome = results.map((r) => `*${r.option}:* ${r.ok ? `✅ ${r.checks} · \`${r.branch}\` @ \`${r.sha}\`` : "❌ checks failed"}` +
+    const outcome = results.map((r) => `*${r.option}:* ${r.ok ? `✅ ${r.checks}${r.preview ? ` · <${r.preview}|▶ open live>` : ""} · \`${r.branch}\` @ \`${r.sha}\`` : "❌ checks failed"}` +
       (r.deviations?.length ? ` · ⚠️ outside the plan: ${r.deviations.map((f) => `\`${path.basename(f)}\``).join(", ")}` : ""));
     await update("Done.");
     await client.chat.postMessage({
       channel, thread_ts: thread, text: decision.chosen_finding,
       blocks: [...verdict, ...buildSlackMessage(decision, { citations }).slice(0, -1),
-        { type: "context", elements: [{ type: "mrkdwn", text: outcome.join("\n") || "Not built" }] },
+        { type: "context", elements: [{ type: "mrkdwn", text: (beforePreview ? `*Today:* <${beforePreview}|▶ open live>\n` : "") + (outcome.join("\n") || "Not built") }] },
         buildSlackMessage(decision, { citations }).at(-1)!] as never,
     });
     const files = [beforeShot, ...results.map((r) => r.shot)].filter((f): f is string => !!f && fs.existsSync(f));

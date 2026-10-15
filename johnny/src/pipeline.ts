@@ -11,6 +11,7 @@ import { checkCitations } from "./guard/citations";
 import { buildSlackMessage } from "./report/slack";
 import { implementOption } from "./act/implement";
 import { screenshot } from "./verify/screenshots";
+import { deployPreview } from "./verify/preview";
 import { buildThreadPage, type OptionResult } from "./report/thread";
 
 export interface RunOptions {
@@ -25,6 +26,7 @@ export interface RunResult {
   citations: { total: number; valid: number };
   results: OptionResult[];
   beforeShot?: string;
+  beforePreview?: string;
 }
 
 // Observe -> decide -> guard -> (act -> verify). Writes the same files under out/ as before.
@@ -65,14 +67,27 @@ export async function runJohnny(opts: RunOptions = {}): Promise<RunResult> {
   fs.mkdirSync(shots, { recursive: true });
   const beforeShot = path.join(shots, "before.png");
   await screenshot(ROOT, screen, beforeShot, 4301);
+  // Live previews: same builds the screenshots came from, opened on the chosen screen.
+  const live = async (dir: string, title: string) => {
+    try {
+      const url = await deployPreview(path.join(dir, "demo-app", "dist"), title);
+      return url ? `${url}/#${screen}` : undefined;
+    } catch (e) {
+      console.warn(`preview failed: ${(e as Error).message}`);
+      return undefined;
+    }
+  };
+  const beforePreview = await live(ROOT, "before");
   let port = 4302;
   for (const r of results) {
     if (!r.ok) continue;
+    const dir = path.join(ROOT, ".worktrees", `option-${r.option.toLowerCase()}`);
     r.shot = path.join(shots, `option-${r.option.toLowerCase()}.png`);
-    await screenshot(path.join(ROOT, ".worktrees", `option-${r.option.toLowerCase()}`), screen, r.shot, port++);
+    await screenshot(dir, screen, r.shot, port++);
+    r.preview = await live(dir, `option ${r.option}${r.sha ? ` (${r.sha})` : ""}`);
   }
   fs.writeFileSync(path.join(OUT, "results.json"), JSON.stringify(results, null, 2));
   fs.writeFileSync(path.join(OUT, "thread.html"), buildThreadPage(decision, results, beforeShot, citations));
-  await progress("verified", "screenshots and out/thread.html");
-  return { decision, citations, results, beforeShot };
+  await progress("verified", `screenshots${beforePreview ? " and live previews" : ""}, out/thread.html`);
+  return { decision, citations, results, beforeShot, beforePreview };
 }

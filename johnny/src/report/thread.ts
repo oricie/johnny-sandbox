@@ -11,6 +11,7 @@ export interface OptionResult {
   files?: string[];
   deviations?: string[]; // changed files that were not in the option's plan
   shot?: string; // png path
+  preview?: string; // live URL of this option's build
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
@@ -31,6 +32,7 @@ export function buildThreadPage(d: Decision, results: OptionResult[], beforeShot
     <div class="card${rec ? " rec" : ""}">
       <div class="card-head"><b>Option ${o.id} · ${esc(o.name)}</b>${rec ? '<span class="tag">Recommended</span>' : ""}<span class="risk">${o.risk} risk</span></div>
       ${r?.shot ? `<img src="${img(r.shot)}" alt="Option ${o.id} screenshot">` : ""}
+      ${r?.preview ? `<p><a href="${esc(r.preview)}" target="_blank" rel="noopener">▶ Open option ${o.id} live</a></p>` : ""}
       <p>${esc(o.approach)}</p>
       <ul class="pc">${o.pros.map((p) => `<li class="pro">${esc(p)}</li>`).join("")}${o.cons.map((c) => `<li class="con">${esc(c)}</li>`).join("")}</ul>
       <div class="meta">${r ? (r.ok
