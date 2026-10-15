@@ -5,7 +5,7 @@ import { App, Assistant, type SayFn } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import { OUT, ROOT } from "../paths";
 import { runJohnny, type RunResult } from "../pipeline";
-import { ask, about, classify } from "../decide/ask";
+import { reply, type Turn } from "../agent/agent";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
@@ -73,28 +73,34 @@ async function run(client: WebClient, channel: string, thread: string, request?:
   }
 }
 
+// The thread so far, as a conversation. Johnny's own messages are the assistant side.
+async function threadHistory(client: WebClient, channel: string, thread: string, latest: string): Promise<Turn[]> {
+  try {
+    const r = await client.conversations.replies({ channel, ts: thread, limit: 50 });
+    const turns = (r.messages ?? []).filter((m) => m.text).map((m): Turn => ({
+      role: m.bot_id || m.user === botUserId ? "assistant" : "user",
+      text: (m.text ?? "").replace(/<@[^>]+>/g, "").trim(),
+      name: m.user,
+    }));
+    if (turns.length && turns.at(-1)!.role === "user") return turns;
+  } catch { /* fall through: no history access, answer the message alone */ }
+  return [{ role: "user", text: latest }];
+}
+
+// Every message is a turn in a conversation with Johnny. He decides whether to answer,
+// look things up, or start a review or a build (through his tools).
 async function handle(text: string, client: WebClient, channel: string, thread: string, say: SayFn) {
   threads.add(thread);
-  const t = text.trim();
-  if (!t || /^review$/i.test(t)) return run(client, channel, thread);
-  const { intent, reply } = await classify(t);
-  if (intent === "chat") {
-    await say({ thread_ts: thread, text: reply });
-    return;
-  }
-  if (intent === "about") {
-    const inboxFile = path.join(OUT, "slack-inbox.jsonl");
-    const inbox = fs.existsSync(inboxFile) ? fs.readFileSync(inboxFile, "utf8").split("\n").filter(Boolean).length : 0;
-    const last = [...runs.values()].at(-1)?.decision.chosen_finding;
-    await say({ thread_ts: thread, text: await about(t, { busy, runs: runs.size, lastFinding: last, inbox }) });
-    return;
-  }
-  if (intent === "question") {
-    const a = await ask(t);
-    await say({ thread_ts: thread, text: a.answer + (a.sources.length ? `\n_${a.sources.join(" · ")}_` : "") });
-    return;
-  }
-  return run(client, channel, thread, intent === "review" ? undefined : t);
+  const history = await threadHistory(client, channel, thread, text.trim());
+  const answer = await reply(history, {
+    status: () => ({ busy, runs: runs.size, lastFinding: [...runs.values()].at(-1)?.decision.chosen_finding }),
+    startRun: async (request) => {
+      if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
+      void run(client, channel, thread, request);
+      return "Started. Progress and results will be posted in this thread in 2-3 minutes.";
+    },
+  });
+  if (answer) await say({ thread_ts: thread, text: answer });
 }
 
 app.command("/johnny", async ({ ack, command, client }) => {

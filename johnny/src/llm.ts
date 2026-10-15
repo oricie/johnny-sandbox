@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { CHARTER } from "./charter";
 
 export const MODEL = "claude-opus-5-5";
 
@@ -19,7 +20,7 @@ export async function structured<T>(system: string, user: string, schema: Record
     max_tokens: 64000,
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    system,
+    system: `${CHARTER}\n\n---\n\n${system}`,
     output_config: { effort, format: { type: "json_schema", schema } },
     messages: [{ role: "user", content: user }],
   }).finalMessage();
