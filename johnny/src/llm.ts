@@ -12,14 +12,15 @@ export function client() {
 
 // One structured call: system + user text in, JSON matching `schema` out.
 // Streamed, because whole-file edits can be long and the SDK refuses large non-streaming requests.
-export async function structured<T>(system: string, user: string, schema: Record<string, unknown>): Promise<T> {
+export async function structured<T>(system: string, user: string, schema: Record<string, unknown>,
+  effort: "low" | "medium" | "high" = "high"): Promise<T> {
   const response = await client().beta.messages.stream({
     model: MODEL,
     max_tokens: 64000,
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
     system,
-    output_config: { effort: "high", format: { type: "json_schema", schema } },
+    output_config: { effort, format: { type: "json_schema", schema } },
     messages: [{ role: "user", content: user }],
   }).finalMessage();
   if (response.stop_reason === "refusal") throw new Error("Model declined the request");

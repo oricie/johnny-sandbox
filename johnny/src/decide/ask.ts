@@ -20,3 +20,26 @@ Use Slack mrkdwn (*bold*), not Markdown headings.`,
     },
   );
 }
+
+export type Intent = "chat" | "question" | "request" | "review";
+
+// Routes a Slack message: small talk gets a short reply, questions get answered from
+// what Johnny knows, change requests and reviews start a run (which costs minutes).
+export async function classify(text: string): Promise<{ intent: Intent; reply: string }> {
+  return structured(
+    `You route messages sent to Johnny, a product design agent for the Sentinel SOC console.
+intent:
+- "review": asks Johnny to look over the product and find what to improve, with no specific change.
+- "request": asks for a specific change to the product UI.
+- "question": asks about the product, its users, data, decisions or Johnny's reasoning.
+- "chat": greetings, thanks, small talk, or anything else.
+For "chat", write a one or two sentence reply in the message's language that says what Johnny can do
+(review the product, answer questions about it, build a requested change). Otherwise reply is "".`,
+    text,
+    {
+      type: "object", additionalProperties: false, required: ["intent", "reply"],
+      properties: { intent: { type: "string", enum: ["chat", "question", "request", "review"] }, reply: { type: "string" } },
+    },
+    "low",
+  );
+}

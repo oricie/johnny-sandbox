@@ -5,7 +5,7 @@ import { App, Assistant, type SayFn } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import { OUT, ROOT } from "../paths";
 import { runJohnny, type RunResult } from "../pipeline";
-import { ask } from "../decide/ask";
+import { ask, classify } from "../decide/ask";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
@@ -24,9 +24,6 @@ if (!botToken || !appToken) throw new Error("Set JOHNNY_SLACK_BOT_TOKEN and JOHN
 const app = new App({ token: botToken, appToken, socketMode: true });
 let busy = false; // one run at a time: both options share the same worktrees
 const runs = new Map<string, RunResult>(); // thread ts -> last run, for the approve buttons
-
-const isQuestion = (t: string) =>
-  /\?\s*$/.test(t) && /^(why|what|how|who|when|where|is|are|does|do|can|למה|מה|איך|מי|מתי|איפה|האם)\b/i.test(t.trim());
 
 async function run(client: WebClient, channel: string, thread: string, request?: string) {
   if (busy) {
@@ -77,12 +74,17 @@ async function run(client: WebClient, channel: string, thread: string, request?:
 async function handle(text: string, client: WebClient, channel: string, thread: string, say: SayFn) {
   const t = text.trim();
   if (!t || /^review$/i.test(t)) return run(client, channel, thread);
-  if (isQuestion(t)) {
+  const { intent, reply } = await classify(t);
+  if (intent === "chat") {
+    await say({ thread_ts: thread, text: reply });
+    return;
+  }
+  if (intent === "question") {
     const a = await ask(t);
     await say({ thread_ts: thread, text: a.answer + (a.sources.length ? `\n_${a.sources.join(" · ")}_` : "") });
     return;
   }
-  return run(client, channel, thread, t);
+  return run(client, channel, thread, intent === "review" ? undefined : t);
 }
 
 app.command("/johnny", async ({ ack, command, client }) => {
