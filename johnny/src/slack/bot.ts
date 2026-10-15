@@ -24,6 +24,8 @@ if (!botToken || !appToken) throw new Error("Set JOHNNY_SLACK_BOT_TOKEN and JOHN
 const app = new App({ token: botToken, appToken, socketMode: true });
 let busy = false; // one run at a time: both options share the same worktrees
 const runs = new Map<string, RunResult>(); // thread ts -> last run, for the approve buttons
+const threads = new Set<string>(); // threads Johnny is part of: he answers there without a mention
+let botUserId = "";
 
 async function run(client: WebClient, channel: string, thread: string, request?: string) {
   if (busy) {
@@ -72,6 +74,7 @@ async function run(client: WebClient, channel: string, thread: string, request?:
 }
 
 async function handle(text: string, client: WebClient, channel: string, thread: string, say: SayFn) {
+  threads.add(thread);
   const t = text.trim();
   if (!t || /^review$/i.test(t)) return run(client, channel, thread);
   const { intent, reply } = await classify(t);
@@ -149,12 +152,18 @@ app.assistant(new Assistant({
 }));
 
 // Listening: keep what people say in channels Johnny was invited to, for the learning step.
-app.message(async ({ message }) => {
-  const m = message as { subtype?: string; bot_id?: string; text?: string; user?: string; channel: string; ts: string };
+app.message(async ({ message, client, say }) => {
+  const m = message as { subtype?: string; bot_id?: string; text?: string; user?: string; channel: string; ts: string; thread_ts?: string; channel_type?: string };
   if (m.subtype || m.bot_id || !m.text) return;
+  // A reply in a thread Johnny is part of, without a mention (mentions go through app_mention).
+  const mentioned = botUserId && m.text.includes(`<@${botUserId}>`);
+  if (m.thread_ts && threads.has(m.thread_ts) && !mentioned && m.channel_type !== "im") {
+    await handle(m.text, client, m.channel, m.thread_ts, say);
+  }
   fs.mkdirSync(OUT, { recursive: true });
   fs.appendFileSync(path.join(OUT, "slack-inbox.jsonl"), JSON.stringify({ channel: m.channel, user: m.user, ts: m.ts, text: m.text }) + "\n");
 });
 
 await app.start();
+botUserId = (await app.client.auth.test()).user_id ?? "";
 console.log("Johnny is connected to Slack (Socket Mode).");
