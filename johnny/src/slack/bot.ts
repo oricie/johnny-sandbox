@@ -5,7 +5,7 @@ import { App, Assistant, type SayFn } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import { OUT, ROOT } from "../paths";
 import { runJohnny, type RunResult } from "../pipeline";
-import { ask, classify } from "../decide/ask";
+import { ask, about, classify } from "../decide/ask";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
@@ -80,6 +80,13 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
   const { intent, reply } = await classify(t);
   if (intent === "chat") {
     await say({ thread_ts: thread, text: reply });
+    return;
+  }
+  if (intent === "about") {
+    const inboxFile = path.join(OUT, "slack-inbox.jsonl");
+    const inbox = fs.existsSync(inboxFile) ? fs.readFileSync(inboxFile, "utf8").split("\n").filter(Boolean).length : 0;
+    const last = [...runs.values()].at(-1)?.decision.chosen_finding;
+    await say({ thread_ts: thread, text: await about(t, { busy, runs: runs.size, lastFinding: last, inbox }) });
     return;
   }
   if (intent === "question") {
