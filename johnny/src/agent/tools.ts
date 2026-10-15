@@ -12,7 +12,7 @@ const READABLE = ["context/", "demo-app/src/", "demo-api/src/", "constraints.jso
 export interface AgentHooks {
   startRun: (request?: string) => Promise<string>; // starts a review or request run; results go to the thread
   startPrototype: (brief: string, variants: number) => Promise<string>; // exploration prototypes; results go to the thread
-  status: () => { busy: boolean; runs: number; lastFinding?: string };
+  status: () => Record<string, unknown>;
 }
 
 export const TOOL_DEFS = [
@@ -40,7 +40,7 @@ export const TOOL_DEFS = [
   },
   {
     name: "status",
-    description: "Whether you are in the middle of a run, how many runs you've done, and your last finding.",
+    description: "Whether you are in the middle of a run, your last finding, and for this thread: the finding, the live links (today and each option), branches, changed files and what you changed. Use it when people ask about the options you built here.",
     input_schema: { type: "object", additionalProperties: false, properties: {}, required: [] },
   },
   {

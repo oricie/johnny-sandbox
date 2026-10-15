@@ -25,6 +25,17 @@ if (!botToken || !appToken) throw new Error("Set JOHNNY_SLACK_BOT_TOKEN and JOHN
 const app = new App({ token: botToken, appToken, socketMode: true });
 let busy = false; // one run at a time: both options share the same worktrees
 const runs = new Map<string, RunResult>(); // thread ts -> last run, for the approve buttons
+// Runs are also kept on disk so buttons in older threads keep working after a restart.
+const runFile = (thread: string) => path.join(OUT, "runs", `${thread}.json`);
+function saveRun(thread: string, r: RunResult) {
+  runs.set(thread, r);
+  fs.mkdirSync(path.dirname(runFile(thread)), { recursive: true });
+  fs.writeFileSync(runFile(thread), JSON.stringify(r));
+}
+function loadRun(thread: string): RunResult | undefined {
+  if (runs.has(thread)) return runs.get(thread);
+  try { const r = JSON.parse(fs.readFileSync(runFile(thread), "utf8")) as RunResult; runs.set(thread, r); return r; } catch { return undefined; }
+}
 const threads = new Set<string>(); // threads Johnny is part of: he answers there without a mention
 let botUserId = "";
 
@@ -68,7 +79,7 @@ async function run(client: WebClient, channel: string, thread: string, request?:
         if (stage === "acted") await update(`🛠️ Built (${detail}). Taking screenshots…`);
       },
     });
-    runs.set(thread, result);
+    saveRun(thread, result);
     const { decision, results, beforeShot, beforePreview } = result;
     const citations = checkCitations(decision, loadKnowledge());
 
@@ -133,6 +144,18 @@ async function runPrototype(client: WebClient, channel: string, thread: string, 
   }
 }
 
+// Johnny answers in threads he's part of. After a restart the in-memory set is empty,
+// so look at the thread: if Johnny posted in it, it's his.
+async function isJohnnysThread(client: WebClient, channel: string, thread: string) {
+  if (threads.has(thread)) return true;
+  try {
+    const r = await client.conversations.replies({ channel, ts: thread, limit: 50 });
+    const mine = (r.messages ?? []).some((m) => m.bot_id || m.user === botUserId);
+    if (mine) threads.add(thread);
+    return mine;
+  } catch { return false; }
+}
+
 // The thread so far, as a conversation. Johnny's own messages are the assistant side.
 async function threadHistory(client: WebClient, channel: string, thread: string, latest: string): Promise<Turn[]> {
   try {
@@ -157,7 +180,12 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
   threads.add(thread);
   const history = await threadHistory(client, channel, thread, text.trim());
   const answer = await reply(history, {
-    status: () => ({ busy, runs: runs.size, lastFinding: [...runs.values()].at(-1)?.decision.chosen_finding }),
+    status: () => {
+      const r = loadRun(thread);
+      return { busy, runs: runs.size, lastFinding: [...runs.values()].at(-1)?.decision.chosen_finding,
+        thisThread: r ? { finding: r.decision.chosen_finding, today: r.beforePreview,
+          options: r.results.map((x) => ({ option: x.option, ok: x.ok, live: x.preview, branch: x.branch, changed: x.files, summary: x.summary })) } : undefined };
+    },
     startRun: async (request) => {
       if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
       void run(client, channel, thread, request);
@@ -199,7 +227,7 @@ app.action(/^(approve_a|approve_b|revise)$/, async ({ ack, action, body, client 
     return;
   }
   const option = id.endsWith("a") ? "A" : "B";
-  const r = runs.get(thread)?.results.find((x) => x.option === option);
+  const r = loadRun(thread)?.results.find((x) => x.option === option);
   if (!r?.ok) {
     await client.chat.postMessage({ channel, thread_ts: thread, text: `Option ${option} isn't available to approve.` });
     return;
@@ -208,7 +236,7 @@ app.action(/^(approve_a|approve_b|revise)$/, async ({ ack, action, body, client 
     execFileSync("git", ["push", "-f", "-q", "origin", r.branch], { cwd: ROOT });
     const repo = execFileSync("git", ["remote", "get-url", "origin"], { cwd: ROOT }).toString().trim().replace(/\.git$/, "");
     await client.chat.postMessage({ channel, thread_ts: thread,
-      text: `✅ <@${b.user.id}> approved option ${option}. Pushed \`${r.branch}\` (${r.sha}): ${repo}/compare/main...${r.branch}` });
+      text: `✅ <@${b.user.id}> approved option ${option}.${r.preview ? ` Live: <${r.preview}|open option ${option}>.` : ""} Pushed \`${r.branch}\` (${r.sha}): ${repo}/compare/main...${r.branch}` });
   } catch (e) {
     await client.chat.postMessage({ channel, thread_ts: thread, text: `Approved, but pushing the branch failed: ${(e as Error).message.slice(0, 300)}` });
   }
@@ -240,7 +268,7 @@ app.message(async ({ message, client, say }) => {
   if ((m.subtype && m.subtype !== "file_share") || m.bot_id || (!m.text && m.subtype !== "file_share")) return;
   // A reply in a thread Johnny is part of, without a mention (mentions go through app_mention).
   const mentioned = botUserId && (m.text ?? "").includes(`<@${botUserId}>`);
-  if (m.thread_ts && threads.has(m.thread_ts) && !mentioned && m.channel_type !== "im") {
+  if (m.thread_ts && !mentioned && m.channel_type !== "im" && await isJohnnysThread(client, m.channel, m.thread_ts)) {
     await handle(m.text ?? "", client, m.channel, m.thread_ts, say);
   }
   fs.mkdirSync(OUT, { recursive: true });
