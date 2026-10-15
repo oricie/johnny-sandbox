@@ -12,10 +12,12 @@ import { buildSlackMessage } from "./report/slack";
 import { implementOption } from "./act/implement";
 import { screenshot } from "./verify/screenshots";
 import { deployPreview } from "./verify/preview";
+import { compareToReference, type Comparison } from "./verify/compare";
 import { buildThreadPage, type OptionResult } from "./report/thread";
 
 export interface RunOptions {
   request?: string; // request mode; otherwise Johnny's own review
+  images?: string[]; // image files that are part of the request (screenshots, sketches, mockups)
   decisionFile?: string; // reuse a saved decision
   act?: boolean; // implement, check and screenshot both options
   onProgress?: (stage: "observed" | "decided" | "acted" | "verified", detail: string) => void | Promise<void>;
@@ -27,6 +29,7 @@ export interface RunResult {
   results: OptionResult[];
   beforeShot?: string;
   beforePreview?: string;
+  comparison?: Comparison[];
 }
 
 // Observe -> decide -> guard -> (act -> verify). Writes the same files under out/ as before.
@@ -43,7 +46,7 @@ export async function runJohnny(opts: RunOptions = {}): Promise<RunResult> {
 
   const decision: Decision = opts.decisionFile
     ? JSON.parse(fs.readFileSync(path.resolve(ROOT, opts.decisionFile), "utf8"))
-    : opts.request ? await decideRequest(packs, opts.request) : await decide(packs);
+    : opts.request ? await decideRequest(packs, opts.request, opts.images) : await decide(packs);
   fs.writeFileSync(path.join(OUT, "decision.json"), JSON.stringify(decision, null, 2));
   const c = checkCitations(decision, knowledge);
   const citations = { total: c.total, valid: c.total - c.invalid.length };
@@ -55,7 +58,7 @@ export async function runJohnny(opts: RunOptions = {}): Promise<RunResult> {
   const allowed = decision.options.filter((o) => checkPlan(o.files_to_change).ok);
   const results: OptionResult[] = await Promise.all(allowed.map(async (o) => {
     try {
-      return await implementOption(decision, o);
+      return await implementOption(decision, o, opts.images);
     } catch (e) {
       return { option: o.id, branch: `johnny/option-${o.id.toLowerCase()}`, ok: false, summary: "", checks: (e as Error).message };
     }
@@ -86,8 +89,12 @@ export async function runJohnny(opts: RunOptions = {}): Promise<RunResult> {
     await screenshot(dir, screen, r.shot, port++);
     r.preview = await live(dir, `option ${r.option}${r.sha ? ` (${r.sha})` : ""}`);
   }
-  fs.writeFileSync(path.join(OUT, "results.json"), JSON.stringify(results, null, 2));
+  const comparison = opts.images?.length
+    ? await compareToReference(opts.images, results.filter((r) => r.shot).map((r) => ({ option: r.option, file: r.shot! })), opts.request ?? "")
+        .catch((e) => { console.warn(`compare failed: ${(e as Error).message}`); return undefined; })
+    : undefined;
+  fs.writeFileSync(path.join(OUT, "results.json"), JSON.stringify({ results, comparison }, null, 2));
   fs.writeFileSync(path.join(OUT, "thread.html"), buildThreadPage(decision, results, beforeShot, citations));
   await progress("verified", `screenshots${beforePreview ? " and live previews" : ""}, out/thread.html`);
-  return { decision, citations, results, beforeShot, beforePreview };
+  return { decision, citations, results, beforeShot, beforePreview, comparison };
 }

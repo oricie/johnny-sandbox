@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { structured } from "../llm";
+import { structured, imageBlocks } from "../llm";
 import { ROOT } from "../paths";
 import type { EvidencePack } from "../types";
 
@@ -138,13 +138,18 @@ A teammate asked for a change. Treat it like a design brief, not an order.
   findings only if they bear directly on the ask (for example a decision it collides with).
 - Every claim cites a source you were given. Options may only change files under
   demo-app/src/components, demo-app/src/screens or demo-app/src/styles, using the design system.
+- If the teammate attached images (a screenshot of a problem, a sketch or mockup, another product), treat
+  them as part of the brief. Say what you take from each image. Build in this product's design system
+  and components; do not copy pixels or styles that break it. Cite an image as "image:1", "image:2".
 - Write all human-readable text (titles, reasons, claims, options, explanation) in the same language
   as the teammate's request. Keep file paths, ids and code in English.`;
 
-export async function decideRequest(packs: EvidencePack[], text: string): Promise<Decision> {
+export async function decideRequest(packs: EvidencePack[], text: string, images: string[] = []): Promise<Decision> {
   const d = await structured<Decision & { request_verdict: { verdict: "proceed" | "push_back"; explanation: string } }>(
     REQUEST_SYSTEM,
-    `Teammate's request: "${text}"\n\nEvidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}`,
+    [...imageBlocks(images), { type: "text", text:
+      `Teammate's request: "${text}"${images.length ? ` (with ${images.length} attached image(s) above)` : ""}\n\n` +
+      `Evidence packs:\n${JSON.stringify(packs, null, 2)}\n\nSource files:\n${readSources(packs)}` }],
     REQUEST_SCHEMA,
   );
   const { request_verdict, ...rest } = d;

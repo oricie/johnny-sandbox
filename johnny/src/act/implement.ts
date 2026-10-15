@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ROOT } from "../paths";
-import { structured } from "../llm";
+import { structured, imageBlocks } from "../llm";
 import { checkPlan } from "../guard/constraints";
 import type { Decision } from "../decide/decide";
 import { createWorktree, commitAll } from "./worktree";
@@ -56,7 +56,7 @@ function applyEdit(edit: Edit, dir: string) {
   for (const f of edit.files) fs.writeFileSync(path.join(dir, f.path), f.content);
 }
 
-export async function implementOption(decision: Decision, option: Option) {
+export async function implementOption(decision: Decision, option: Option, images: string[] = []) {
   const { branch, dir } = createWorktree(option.id);
   const context = ["context/design-system.md", "context/decisions.md", "context/personas.md"]
     .map((f) => fileBlock(f, ROOT)).join("\n\n");
@@ -65,13 +65,16 @@ export async function implementOption(decision: Decision, option: Option) {
     `Planned files: ${option.files_to_change.join(", ")}\n\n${context}\n\nCurrent source:\n` +
     appFiles(dir).map((f) => fileBlock(f, dir)).join("\n\n") + extra;
 
-  let edit = await structured<Edit>(SYSTEM, prompt(), SCHEMA);
+  const withImages = (text: string) => images.length
+    ? [...imageBlocks(images), { type: "text" as const, text: `The images above are part of the brief (references, not pixel targets).\n\n${text}` }]
+    : text;
+  let edit = await structured<Edit>(SYSTEM, withImages(prompt()), SCHEMA);
   applyEdit(edit, dir);
   let checks = runChecks(dir);
 
   // One repair round: show the failure and the files as they now are.
   if (!checks.ok) {
-    edit = await structured<Edit>(SYSTEM, prompt(`\n\nYour previous edit failed the checks. Fix it.\n${checks.output}`), SCHEMA);
+    edit = await structured<Edit>(SYSTEM, withImages(prompt(`\n\nYour previous edit failed the checks. Fix it.\n${checks.output}`)), SCHEMA);
     applyEdit(edit, dir);
     checks = runChecks(dir);
   }

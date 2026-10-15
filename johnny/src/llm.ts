@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import Anthropic from "@anthropic-ai/sdk";
 import { CHARTER } from "./charter";
 
@@ -13,7 +15,18 @@ export function client() {
 
 // One structured call: system + user text in, JSON matching `schema` out.
 // Streamed, because whole-file edits can be long and the SDK refuses large non-streaming requests.
-export async function structured<T>(system: string, user: string, schema: Record<string, unknown>,
+export type UserContent = string | Anthropic.Beta.BetaContentBlockParam[];
+
+// Images on disk as content blocks, placed before the text that refers to them.
+export function imageBlocks(files: string[] = []): Anthropic.Beta.BetaContentBlockParam[] {
+  const type = (f: string) => (/\.jpe?g$/i.test(f) ? "image/jpeg" : /\.gif$/i.test(f) ? "image/gif" : /\.webp$/i.test(f) ? "image/webp" : "image/png");
+  return files.flatMap((f, i) => [
+    { type: "text" as const, text: `Image ${i + 1} (${path.basename(f)}):` },
+    { type: "image" as const, source: { type: "base64" as const, media_type: type(f), data: fs.readFileSync(f).toString("base64") } },
+  ]);
+}
+
+export async function structured<T>(system: string, user: UserContent, schema: Record<string, unknown>,
   effort: "low" | "medium" | "high" = "high"): Promise<T> {
   const response = await client().beta.messages.stream({
     model: MODEL,

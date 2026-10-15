@@ -56,7 +56,8 @@
         "assistant:write",
         "im:history",
         "im:read",
-        "im:write"
+        "im:write",
+        "files:read"
       ]
     }
   },

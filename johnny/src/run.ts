@@ -1,11 +1,14 @@
 import { buildCodeGraph } from "./observe/codeGraph";
 import { checkPlan } from "./guard/constraints";
+import path from "node:path";
+import { ROOT } from "./paths";
 import { runJohnny } from "./pipeline";
 
 // Flags:
 //   --observe-only        stop after observe
 //   --decision <file>     reuse a saved decision instead of calling the model to decide
 //   --request "<text>"    request mode: a teammate's ask instead of Johnny's own review
+//   --image <file>        attach an image to the request (repeatable)
 //   --act                 implement both options in worktrees, check, screenshot, write out/thread.html
 const args = process.argv.slice(2);
 const value = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
@@ -18,8 +21,10 @@ if (args.includes("--observe-only")) {
   process.exit(0);
 }
 
-const { decision, results } = await runJohnny({
+const images = args.flatMap((a, i) => (a === "--image" ? [path.resolve(ROOT, args[i + 1])] : []));
+const { decision, results, comparison } = await runJohnny({
   request: value("--request"),
+  images,
   decisionFile: value("--decision"),
   act: args.includes("--act"),
   onProgress: (stage, detail) => lap(`${stage}: ${detail}`),
@@ -32,4 +37,9 @@ if (decision.request) console.log(`  request verdict: ${decision.request.verdict
 for (const r of results) {
   const dev = r.deviations?.length ? `; outside the plan: ${r.deviations.join(", ")}` : "";
   console.log(`  act ${r.option}: ${r.ok ? `committed ${r.sha} on ${r.branch}${dev}` : `failed: ${r.checks.slice(0, 300)}`}`);
+}
+for (const c of comparison ?? []) {
+  console.log(`  vs reference, option ${c.option}: ${c.verdict}`);
+  for (const g of c.gaps) console.log(`    gap: ${g}`);
+  for (const d of c.deliberate) console.log(`    deliberate: ${d}`);
 }

@@ -1,9 +1,9 @@
 import type Anthropic from "@anthropic-ai/sdk";
-import { client, MODEL } from "../llm";
+import { client, MODEL, imageBlocks } from "../llm";
 import { CHARTER } from "../charter";
 import { TOOL_DEFS, runTool, type AgentHooks } from "./tools";
 
-export interface Turn { role: "user" | "assistant"; text: string; name?: string }
+export interface Turn { role: "user" | "assistant"; text: string; name?: string; images?: string[] }
 
 const SYSTEM = `${CHARTER}
 
@@ -17,6 +17,9 @@ Reply in the language of the person's most recent message, even if earlier messa
 another language. Keep it short: usually 3 to 8 lines, the answer first. Offer more detail instead of
 writing it all. Slack mrkdwn only: *bold*, • bullets, no headings.
 
+People may attach images: a screenshot of a problem, a sketch or mockup, another product. Look at them
+and say what you see and take from them. When you start a request, the thread's images go with it.
+
 Starting a review or a build takes minutes and costs money: do it only when the person asks for it or
 clearly agrees. When they're discussing or asking, discuss and answer. After you start one, say so in a
 sentence; the results arrive in the thread on their own.`;
@@ -26,12 +29,20 @@ type Msg = Anthropic.Beta.BetaMessageParam;
 // One reply to a Slack conversation: a tool-use loop until Johnny has an answer.
 export async function reply(history: Turn[], hooks: AgentHooks): Promise<string> {
   // Slack threads can start with Johnny or have several messages in a row from one side.
+  // Only the most recent images go to the model; older ones are mentioned by name.
+  const recent = new Set(history.flatMap((t) => t.images ?? []).slice(-4));
   const messages: Msg[] = [];
   for (const t of history) {
-    const text = t.role === "user" && t.name ? `${t.name}: ${t.text}` : t.text;
+    const text = (t.role === "user" && t.name ? `${t.name}: ${t.text}` : t.text) || "(image)";
+    const imgs = (t.images ?? []).filter((f) => recent.has(f));
+    const older = (t.images ?? []).filter((f) => !recent.has(f));
+    const blocks: Anthropic.Beta.BetaContentBlockParam[] = [
+      ...imageBlocks(imgs),
+      { type: "text", text: text + (older.length ? `\n(earlier images: ${older.length})` : "") },
+    ];
     const last = messages.at(-1);
-    if (last && last.role === t.role && typeof last.content === "string") last.content += `\n\n${text}`;
-    else messages.push({ role: t.role, content: text });
+    if (last && last.role === t.role && Array.isArray(last.content)) (last.content as Anthropic.Beta.BetaContentBlockParam[]).push(...blocks);
+    else messages.push({ role: t.role, content: t.role === "assistant" ? text : blocks });
   }
   while (messages.length && messages[0].role !== "user") messages.shift();
   if (!messages.length) return "";

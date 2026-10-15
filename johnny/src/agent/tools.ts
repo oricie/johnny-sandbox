@@ -49,7 +49,7 @@ export const TOOL_DEFS = [
   },
   {
     name: "start_request",
-    description: "Start work on a specific change the person asked for: check it against decisions, propose two options (or push back with alternatives), build, check and screenshot. Takes 2-3 minutes; results are posted to this thread. Only when the person clearly wants the change built, not when they are still discussing.",
+    description: "Start work on a specific change the person asked for: check it against decisions, propose two options (or push back with alternatives), build, check and screenshot. Images attached in this thread are passed along automatically, and the result is compared against them. Takes 2-3 minutes; results are posted to this thread. Only when the person clearly wants the change built, not when they are still discussing.",
     input_schema: { type: "object", additionalProperties: false, required: ["request"],
       properties: { request: { type: "string", description: "The change, written as a clear brief including what was agreed in this conversation" } } },
   },

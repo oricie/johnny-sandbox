@@ -27,6 +27,29 @@ const runs = new Map<string, RunResult>(); // thread ts -> last run, for the app
 const threads = new Set<string>(); // threads Johnny is part of: he answers there without a mention
 let botUserId = "";
 
+const threadImages = new Map<string, string[]>(); // thread ts -> image files downloaded from it
+
+// Downloads image attachments (needs files:read) so they can be shown to the model.
+async function downloadImages(files: { id?: string; mimetype?: string; url_private_download?: string; url_private?: string }[] = []) {
+  const out: string[] = [];
+  for (const f of files) {
+    const url = f.url_private_download ?? f.url_private;
+    if (!f.id || !url || !/^image\/(png|jpe?g|gif|webp)$/.test(f.mimetype ?? "")) continue;
+    const file = path.join(OUT, "slack-images", `${f.id}.${f.mimetype!.split("/")[1].replace("jpeg", "jpg")}`);
+    if (!fs.existsSync(file)) {
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${botToken}` } });
+      const type = res.headers.get("content-type") ?? "";
+      if (!res.ok || !type.startsWith("image/")) continue; // e.g. an HTML login page when files:read is missing
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length > 4_500_000) continue; // the API's per-image limit is 5 MB
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, buf);
+    }
+    out.push(file);
+  }
+  return out;
+}
+
 async function run(client: WebClient, channel: string, thread: string, request?: string) {
   if (busy) {
     await client.chat.postMessage({ channel, thread_ts: thread, text: "I'm in the middle of another run. Try again in a couple of minutes." });
@@ -36,8 +59,9 @@ async function run(client: WebClient, channel: string, thread: string, request?:
   const status = await client.chat.postMessage({ channel, thread_ts: thread, text: "👀 Reading the product, the context and the usage data…" });
   const update = (text: string) => client.chat.update({ channel, ts: status.ts!, text });
   try {
+    const images = request ? threadImages.get(thread) ?? [] : [];
     const result = await runJohnny({
-      request, act: true,
+      request, images, act: true,
       onProgress: async (stage, detail) => {
         if (stage === "decided") await update("🧠 Decided. Building both options in separate branches and checking them…");
         if (stage === "acted") await update(`🛠️ Built (${detail}). Taking screenshots…`);
@@ -59,6 +83,11 @@ async function run(client: WebClient, channel: string, thread: string, request?:
         { type: "context", elements: [{ type: "mrkdwn", text: (beforePreview ? `*Today:* <${beforePreview}|▶ open live>\n` : "") + (outcome.join("\n") || "Not built") }] },
         buildSlackMessage(decision, { citations }).at(-1)!] as never,
     });
+    for (const c of result.comparison ?? []) {
+      const lines = [`*Option ${c.option} vs your image:* ${c.verdict}`,
+        ...c.gaps.map((g) => `• gap: ${g}`), ...c.deliberate.map((d) => `• on purpose: ${d}`)];
+      await client.chat.postMessage({ channel, thread_ts: thread, text: lines.join("\n") });
+    }
     const files = [beforeShot, ...results.map((r) => r.shot)].filter((f): f is string => !!f && fs.existsSync(f));
     if (files.length) {
       await client.files.uploadV2({
@@ -77,11 +106,15 @@ async function run(client: WebClient, channel: string, thread: string, request?:
 async function threadHistory(client: WebClient, channel: string, thread: string, latest: string): Promise<Turn[]> {
   try {
     const r = await client.conversations.replies({ channel, ts: thread, limit: 50 });
-    const turns = (r.messages ?? []).filter((m) => m.text).map((m): Turn => ({
-      role: m.bot_id || m.user === botUserId ? "assistant" : "user",
-      text: (m.text ?? "").replace(/<@[^>]+>/g, "").trim(),
-      name: m.user,
-    }));
+    const turns: Turn[] = [];
+    for (const m of r.messages ?? []) {
+      const mine = !!m.bot_id || m.user === botUserId;
+      const images = mine ? [] : await downloadImages(m.files as never);
+      if (!m.text && !images.length) continue;
+      turns.push({ role: mine ? "assistant" : "user", text: (m.text ?? "").replace(/<@[^>]+>/g, "").trim(), name: m.user, images });
+    }
+    const all = turns.flatMap((t) => t.images ?? []);
+    if (all.length) threadImages.set(thread, all.slice(-4));
     if (turns.length && turns.at(-1)!.role === "user") return turns;
   } catch { /* fall through: no history access, answer the message alone */ }
   return [{ role: "user", text: latest }];
@@ -167,14 +200,15 @@ app.assistant(new Assistant({
 // Listening: keep what people say in channels Johnny was invited to, for the learning step.
 app.message(async ({ message, client, say }) => {
   const m = message as { subtype?: string; bot_id?: string; text?: string; user?: string; channel: string; ts: string; thread_ts?: string; channel_type?: string };
-  if (m.subtype || m.bot_id || !m.text) return;
+  // file_share: a message with an attachment (e.g. a screenshot); other subtypes are edits, joins, etc.
+  if ((m.subtype && m.subtype !== "file_share") || m.bot_id || (!m.text && m.subtype !== "file_share")) return;
   // A reply in a thread Johnny is part of, without a mention (mentions go through app_mention).
-  const mentioned = botUserId && m.text.includes(`<@${botUserId}>`);
+  const mentioned = botUserId && (m.text ?? "").includes(`<@${botUserId}>`);
   if (m.thread_ts && threads.has(m.thread_ts) && !mentioned && m.channel_type !== "im") {
-    await handle(m.text, client, m.channel, m.thread_ts, say);
+    await handle(m.text ?? "", client, m.channel, m.thread_ts, say);
   }
   fs.mkdirSync(OUT, { recursive: true });
-  fs.appendFileSync(path.join(OUT, "slack-inbox.jsonl"), JSON.stringify({ channel: m.channel, user: m.user, ts: m.ts, text: m.text }) + "\n");
+  if (m.text) fs.appendFileSync(path.join(OUT, "slack-inbox.jsonl"), JSON.stringify({ channel: m.channel, user: m.user, ts: m.ts, text: m.text }) + "\n");
 });
 
 await app.start();

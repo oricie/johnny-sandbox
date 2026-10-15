@@ -12,6 +12,7 @@ export function checkCitations(decision: Decision, knowledge: KnowledgeDoc[]) {
 
   const valid = (source: string) => {
     if (ids.has(source)) return true;
+    if (/^image:\d+$/.test(source)) return true;
     if (source.startsWith("analytics.json")) {
       const screen = /screens\["([^"]+)"\]/.exec(source)?.[1];
       return screen ? analytics.includes(`"${screen}"`) : /feedback\[\d+\]|^analytics\.json$/.test(source);
