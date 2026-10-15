@@ -33,4 +33,9 @@ body { margin: 0; font-family: var(--font); background: var(--color-bg); color: 
 .btn { font: inherit; padding: var(--space-2) var(--space-3); border-radius: var(--radius); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer; }
 .btn[aria-pressed="true"] { border-color: var(--color-accent); color: var(--color-accent); }
 .badge { font-size: 12px; padding: 2px var(--space-2); border-radius: 999px; background: var(--color-bg); border: 1px solid var(--color-border); }
+.badge--sev { font-weight: 600; border-color: currentColor; }
+.badge--sev-critical { color: var(--color-sev-critical); background: var(--color-sev-critical-bg); }
+.badge--sev-high { color: var(--color-sev-high); }
+.badge--sev-medium { color: var(--color-sev-medium); }
+.badge--sev-low { color: var(--color-sev-low); }
 .tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
