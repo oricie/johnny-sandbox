@@ -1,5 +1,18 @@
 {
-  "protected_paths": ["demo-api/**", "demo-app/src/api/**"],
-  "editable_paths": ["demo-app/src/components/**", "demo-app/src/screens/**", "demo-app/src/styles/**"],
-  "required_checks": ["typecheck", "build"]
+  "protected_paths": [
+    "demo-api/**",
+    "demo-app/src/api/**"
+  ],
+  "editable_paths": [
+    "demo-app/src/components/**",
+    "demo-app/src/screens/**",
+    "demo-app/src/styles/**"
+  ],
+  "required_checks": [
+    "typecheck",
+    "build"
+  ],
+  "prototype_paths": [
+    "demo-app/src/prototypes/**"
+  ]
 }

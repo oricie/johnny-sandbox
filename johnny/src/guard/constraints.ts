@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ROOT, matchGlob } from "../paths";
 
-interface Constraints { protected_paths: string[]; editable_paths: string[]; required_checks: string[] }
+interface Constraints { protected_paths: string[]; editable_paths: string[]; prototype_paths: string[]; required_checks: string[] }
 
 export const constraints: Constraints = JSON.parse(fs.readFileSync(path.join(ROOT, "constraints.json"), "utf8"));
 

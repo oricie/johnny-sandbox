@@ -4,6 +4,12 @@ import { AlertQueue } from "./screens/AlertQueue";
 import { IncidentResponse } from "./screens/IncidentResponse";
 
 // Route table. Johnny reads this to map analytics screens to components.
+// Exploration prototypes: every prototypes/<name>.tsx is served at #/proto/<name>, outside the nav.
+const prototypeModules = import.meta.glob<{ default: () => JSX.Element }>("./prototypes/*.tsx", { eager: true });
+const prototypes = Object.fromEntries(
+  Object.entries(prototypeModules).map(([file, mod]) => [`/proto/${file.replace(/^.*\/(.*)\.tsx$/, "$1")}`, mod.default]),
+);
+
 export const routes = [
   { path: "/overview", screen: PostureOverview, title: "Posture" },
   { path: "/alerts", screen: AlertQueue, title: "Alert queue" },
@@ -23,7 +29,7 @@ export function App() {
   }, []);
 
   const route = routes.find((r) => r.path === path) ?? routes[0];
-  const Screen = route.screen;
+  const Screen = prototypes[path] ?? route.screen;
   return (
     <div className="shell">
       <nav className="nav">

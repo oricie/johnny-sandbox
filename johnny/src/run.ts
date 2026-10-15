@@ -3,6 +3,7 @@ import { checkPlan } from "./guard/constraints";
 import path from "node:path";
 import { ROOT } from "./paths";
 import { runJohnny } from "./pipeline";
+import { prototype } from "./prototype";
 
 // Flags:
 //   --observe-only        stop after observe
@@ -18,6 +19,15 @@ const lap = (label: string) => console.log(`[${((Date.now() - t0) / 1000).toFixe
 if (args.includes("--observe-only")) {
   const g = buildCodeGraph();
   lap(`observe: ${Object.keys(g.nodes).length} files, ${g.routes.length} screens`);
+  process.exit(0);
+}
+
+//   --prototype "<idea>"  exploration mode: several working directions outside the nav (--variants N)
+if (value("--prototype")) {
+  const images0 = args.flatMap((a, i) => (a === "--image" ? [path.resolve(ROOT, args[i + 1])] : []));
+  const p = await prototype(value("--prototype")!, { variants: Number(value("--variants") ?? 3), images: images0, onProgress: (s) => lap(s) });
+  lap(`prototypes: ${p.ok ? `committed on ${p.branch}` : `checks failed\n${p.checks}`}`);
+  for (const d of p.directions) console.log(`  ${d.route}  ${d.title}: ${d.idea}${d.preview ? `\n    live: ${d.preview}` : ""}`);
   process.exit(0);
 }
 
