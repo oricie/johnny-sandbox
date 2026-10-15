@@ -6,6 +6,7 @@ import type { WebClient } from "@slack/web-api";
 import { OUT, ROOT } from "../paths";
 import { runJohnny, type RunResult } from "../pipeline";
 import { reply, type Turn } from "../agent/agent";
+import { prototype } from "../prototype";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
@@ -102,6 +103,36 @@ async function run(client: WebClient, channel: string, thread: string, request?:
   }
 }
 
+// Exploration prototypes: several directions, each with a live link and a screenshot.
+async function runPrototype(client: WebClient, channel: string, thread: string, brief: string, variants: number) {
+  if (busy) {
+    await client.chat.postMessage({ channel, thread_ts: thread, text: "I'm in the middle of another run. Try again in a couple of minutes." });
+    return;
+  }
+  busy = true;
+  const status = await client.chat.postMessage({ channel, thread_ts: thread, text: "🧪 Thinking of different directions…" });
+  const update = (text: string) => client.chat.update({ channel, ts: status.ts!, text });
+  try {
+    const p = await prototype(brief, { variants, images: threadImages.get(thread) ?? [], onProgress: (s) => { void update(`🧪 ${s}`); } });
+    if (!p.ok) {
+      await update(`The prototypes didn't pass the checks:\n\`\`\`${p.checks.slice(0, 1500)}\`\`\``);
+      return;
+    }
+    await update(`🧪 ${p.directions.length} directions, all built and checked. Exploration only: not for merging as is.`);
+    const lines = p.directions.map((d, i) =>
+      `*${i + 1}. ${d.title}*${d.preview ? `  <${d.preview}|▶ open live>` : ""}\n${d.idea}\n_${d.tradeoff}_`);
+    await client.chat.postMessage({ channel, thread_ts: thread, text: lines.join("\n\n") +
+      "\n\nTell me which direction to take further, or what to mix, and I'll turn it into a proper change." });
+    const files = p.directions.map((d) => d.shot).filter((f): f is string => !!f && fs.existsSync(f));
+    if (files.length) await client.files.uploadV2({ channel_id: channel, thread_ts: thread,
+      file_uploads: files.map((f, i) => ({ file: f, filename: `${i + 1}-${path.basename(f)}` })) });
+  } catch (e) {
+    await update(`Something went wrong: ${(e as Error).message.slice(0, 500)}`);
+  } finally {
+    busy = false;
+  }
+}
+
 // The thread so far, as a conversation. Johnny's own messages are the assistant side.
 async function threadHistory(client: WebClient, channel: string, thread: string, latest: string): Promise<Turn[]> {
   try {
@@ -131,6 +162,11 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
       if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
       void run(client, channel, thread, request);
       return "Started. Progress and results will be posted in this thread in 2-3 minutes.";
+    },
+    startPrototype: async (brief, variants) => {
+      if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
+      void runPrototype(client, channel, thread, brief, variants);
+      return "Started. The directions, live links and screenshots will be posted in this thread in about 3 minutes.";
     },
   });
   if (answer) await say({ thread_ts: thread, text: answer });

@@ -11,6 +11,7 @@ const READABLE = ["context/", "demo-app/src/", "demo-api/src/", "constraints.jso
 
 export interface AgentHooks {
   startRun: (request?: string) => Promise<string>; // starts a review or request run; results go to the thread
+  startPrototype: (brief: string, variants: number) => Promise<string>; // exploration prototypes; results go to the thread
   status: () => { busy: boolean; runs: number; lastFinding?: string };
 }
 
@@ -52,6 +53,15 @@ export const TOOL_DEFS = [
     description: "Start work on a specific change the person asked for: check it against decisions, propose two options (or push back with alternatives), build, check and screenshot. Images attached in this thread are passed along automatically, and the result is compared against them. Takes 2-3 minutes; results are posted to this thread. Only when the person clearly wants the change built, not when they are still discussing.",
     input_schema: { type: "object", additionalProperties: false, required: ["request"],
       properties: { request: { type: "string", description: "The change, written as a clear brief including what was agreed in this conversation" } } },
+  },
+  {
+    name: "start_prototype",
+    description: "Exploration mode: build several quick, genuinely different working prototypes of an idea (a new screen, flow or concept), each a real screen with the product's components and data, outside the navigation, with live links and screenshots. For exploring ideas, not for shipping fixes. Images attached in the thread are passed along. Takes about 3 minutes; results are posted to this thread. Only when the person asks for prototypes, directions or explorations, or agrees to them.",
+    input_schema: { type: "object", additionalProperties: false, required: ["brief"],
+      properties: {
+        brief: { type: "string", description: "The idea to explore, including what was discussed" },
+        variants: { type: "integer", description: "How many directions, 2 to 5 (default 3)" },
+      } },
   },
 ] as const;
 
@@ -95,6 +105,8 @@ export async function runTool(name: string, input: Record<string, unknown>, hook
       return hooks.startRun();
     case "start_request":
       return hooks.startRun(String(input.request ?? ""));
+    case "start_prototype":
+      return hooks.startPrototype(String(input.brief ?? ""), Number(input.variants ?? 3));
     default:
       return `Unknown tool ${name}`;
   }
