@@ -24,6 +24,16 @@ const appToken = process.env.JOHNNY_SLACK_APP_TOKEN;
 if (!botToken || !appToken) throw new Error("Set JOHNNY_SLACK_BOT_TOKEN and JOHNNY_SLACK_APP_TOKEN");
 
 const app = new App({ token: botToken, appToken, socketMode: true });
+const log = (...a: unknown[]) => console.log(new Date().toISOString(), ...a);
+
+// Every incoming event, so the log shows what arrived and what was handled.
+app.use(async ({ body, next }) => {
+  const b = body as { type?: string; event?: { type?: string; subtype?: string; channel?: string; ts?: string; thread_ts?: string; text?: string }; command?: string; actions?: { action_id: string }[] };
+  const e = b.event;
+  log("event", b.type, e?.type ?? b.command ?? b.actions?.[0]?.action_id ?? "", e?.subtype ?? "", e?.channel ?? "", e?.thread_ts ? "thread" : "", e?.text ? `${e.text.length} chars` : "");
+  await next();
+});
+app.error(async (err) => { log("ERROR", err.message, (err as { original?: Error }).original?.stack ?? err.stack ?? ""); });
 let busy = false; // one run at a time: both options share the same worktrees
 const runs = new Map<string, RunResult>(); // thread ts -> last run, for the approve buttons
 // Runs are also kept on disk so buttons in older threads keep working after a restart.
@@ -179,6 +189,7 @@ async function threadHistory(client: WebClient, channel: string, thread: string,
 // look things up, or start a review or a build (through his tools).
 async function handle(text: string, client: WebClient, channel: string, thread: string, say: SayFn) {
   threads.add(thread);
+  log("handle", channel, thread, `${text.length} chars`);
   const history = await threadHistory(client, channel, thread, text.trim());
   const answer = await reply(history, {
     status: () => {
@@ -204,6 +215,7 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
       return "Started. The directions, live links and screenshots will be posted in this thread in about 3 minutes.";
     },
   });
+  log("reply", thread, `${answer.length} chars`);
   if (answer) await say({ thread_ts: thread, text: answer });
 }
 
@@ -219,8 +231,14 @@ app.command("/johnny", async ({ ack, command, client }) => {
 
 app.event("app_mention", async ({ event, client, say }) => {
   const text = event.text.replace(/<@[^>]+>/g, "");
-  await client.reactions.add({ channel: event.channel, timestamp: event.ts, name: "eyes" }).catch(() => {});
-  await handle(text, client, event.channel, event.thread_ts ?? event.ts, say);
+  await client.reactions.add({ channel: event.channel, timestamp: event.ts, name: "eyes" })
+    .catch((e) => log("reaction failed", (e as Error).message));
+  try {
+    await handle(text, client, event.channel, event.thread_ts ?? event.ts, say);
+  } catch (e) {
+    log("ERROR in mention", (e as Error).stack);
+    await say({ thread_ts: event.thread_ts ?? event.ts, text: `Something went wrong: ${(e as Error).message.slice(0, 300)}` }).catch(() => {});
+  }
 });
 
 app.action(/^(approve_a|approve_b|revise)$/, async ({ ack, action, body, client }) => {
