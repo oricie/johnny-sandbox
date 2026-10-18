@@ -32,6 +32,14 @@ export const usage = { calls: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 
 export const costUSD = () =>
   (usage.input * 4 + usage.output * 20 + usage.cacheRead * 0.2 + usage.cacheWrite * 5) / 1e6;
 
+export function track(response: Anthropic.Beta.BetaMessage) {
+  usage.calls++;
+  usage.input += response.usage.input_tokens;
+  usage.output += response.usage.output_tokens;
+  usage.cacheRead += response.usage.cache_read_input_tokens ?? 0;
+  usage.cacheWrite += response.usage.cache_creation_input_tokens ?? 0;
+}
+
 export async function structured<T>(system: string, user: UserContent, schema: Record<string, unknown>,
   effort: "low" | "medium" | "high" = "high"): Promise<T> {
   const response = await client().beta.messages.stream({
@@ -43,11 +51,7 @@ export async function structured<T>(system: string, user: UserContent, schema: R
     output_config: { effort, format: { type: "json_schema", schema } },
     messages: [{ role: "user", content: user }],
   }).finalMessage();
-  usage.calls++;
-  usage.input += response.usage.input_tokens;
-  usage.output += response.usage.output_tokens;
-  usage.cacheRead += response.usage.cache_read_input_tokens ?? 0;
-  usage.cacheWrite += response.usage.cache_creation_input_tokens ?? 0;
+  track(response);
   if (response.stop_reason === "refusal") throw new Error("Model declined the request");
   if (response.stop_reason === "max_tokens") throw new Error("Model output was cut off (max_tokens)");
   const text = response.content.find((b) => b.type === "text");

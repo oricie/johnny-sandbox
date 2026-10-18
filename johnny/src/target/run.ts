@@ -5,6 +5,7 @@ import { OUT } from "../paths";
 import { DECISION_SCHEMA, type Decision } from "../decide/decide";
 import { buildRouteGraph, type RouteInfo } from "./graph";
 import { buildMonorepoGraph } from "./monorepo";
+import { uiFirst, viewFiles } from "./context";
 
 // Johnny on an external repo, decide only. Usage:
 //   tsx src/target/run.ts <repo-root> [--budget <chars>] [--app <app dir, e.g. apps/web/app>]
@@ -27,13 +28,6 @@ const readme = fs.existsSync(path.join(root, "README.md")) ? read("README.md").s
 
 // A route's "own" files live under its page directory; the rest are shared.
 const own = (r: RouteInfo) => r.files.filter((f) => f.startsWith(path.dirname(r.page)));
-// In a large app most of a page's reachable code is server, data and API plumbing, and BFS order
-// reaches it before the view. For a UX review, rendered code comes first: components before
-// server code, nearest to the page first within each group.
-const SERVER = /(^|\/)(server|trpc|prisma|repositor(y|ies)|migrations|api)\/|\.(repository|service|handler|schema)\.ts$|Repository\.ts$|Service\.ts$/i;
-const uiFirst = (files: string[]) => [...files.filter((f) => f.endsWith(".tsx") && !SERVER.test(f)),
-  ...files.filter((f) => !f.endsWith(".tsx") && !SERVER.test(f)), ...files.filter((f) => SERVER.test(f))];
-const viewFiles = (r: RouteInfo) => uiFirst(r.files).filter((f) => f !== r.page && f.endsWith(".tsx")).slice(0, 8);
 const map = routes.map((r) =>
   `${r.route}  page=${r.page}  files=${r.files.length} lines=${r.lines}  views=[${(own(r).length > 1 ? own(r) : viewFiles(r)).map((f) => path.basename(f, ".tsx")).slice(0, 12).join(", ")}]`).join("\n");
 
