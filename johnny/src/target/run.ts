@@ -1,22 +1,24 @@
 import fs from "node:fs";
 import path from "node:path";
-import { structured } from "../llm";
+import { costUSD, structured, usage } from "../llm";
 import { OUT } from "../paths";
 import { DECISION_SCHEMA, type Decision } from "../decide/decide";
 import { buildRouteGraph, type RouteInfo } from "./graph";
+import { buildMonorepoGraph } from "./monorepo";
 
 // Johnny on an external repo, decide only. Usage:
-//   tsx src/target/run.ts <repo-root> [--budget <chars>]
+//   tsx src/target/run.ts <repo-root> [--budget <chars>] [--app <app dir, e.g. apps/web/app>]
 // Stage 1 sees a map of the product (routes, their own components, sizes) and picks where to look.
 // Stage 2 sees the full source of those routes, within a character budget, and decides.
 const root = path.resolve(process.argv[2]);
 const budgetArg = process.argv.indexOf("--budget");
 const BUDGET = budgetArg >= 0 ? Number(process.argv[budgetArg + 1]) : 400_000;
+const appArg = process.argv.indexOf("--app");
 const read = (f: string) => fs.readFileSync(path.join(root, f), "utf8");
 const t0 = Date.now();
 const lap = (s: string) => console.log(`[${((Date.now() - t0) / 1000).toFixed(1)}s] ${s}`);
 
-const routes = buildRouteGraph(root);
+const routes = appArg >= 0 ? buildMonorepoGraph(root, process.argv[appArg + 1]) : buildRouteGraph(root);
 const allFiles = new Set(routes.flatMap((r) => r.files));
 const totalChars = [...allFiles].reduce((n, f) => n + read(f).length, 0);
 lap(`observe: ${routes.length} routes, ${allFiles.size} files reachable from pages, ${(totalChars / 1000).toFixed(0)}k chars`);
@@ -25,8 +27,15 @@ const readme = fs.existsSync(path.join(root, "README.md")) ? read("README.md").s
 
 // A route's "own" files live under its page directory; the rest are shared.
 const own = (r: RouteInfo) => r.files.filter((f) => f.startsWith(path.dirname(r.page)));
+// In a large app most of a page's reachable code is server, data and API plumbing, and BFS order
+// reaches it before the view. For a UX review, rendered code comes first: components before
+// server code, nearest to the page first within each group.
+const SERVER = /(^|\/)(server|trpc|prisma|repositor(y|ies)|migrations|api)\/|\.(repository|service|handler|schema)\.ts$|Repository\.ts$|Service\.ts$/i;
+const uiFirst = (files: string[]) => [...files.filter((f) => f.endsWith(".tsx") && !SERVER.test(f)),
+  ...files.filter((f) => !f.endsWith(".tsx") && !SERVER.test(f)), ...files.filter((f) => SERVER.test(f))];
+const viewFiles = (r: RouteInfo) => uiFirst(r.files).filter((f) => f !== r.page && f.endsWith(".tsx")).slice(0, 8);
 const map = routes.map((r) =>
-  `${r.route}  page=${r.page}  files=${r.files.length} lines=${r.lines}  own=[${own(r).map((f) => path.basename(f, ".tsx")).slice(0, 12).join(", ")}]`).join("\n");
+  `${r.route}  page=${r.page}  files=${r.files.length} lines=${r.lines}  views=[${(own(r).length > 1 ? own(r) : viewFiles(r)).map((f) => path.basename(f, ".tsx")).slice(0, 12).join(", ")}]`).join("\n");
 
 const pick = await structured<{ routes: { route: string; why: string }[]; product_summary: string }>(
   `You are Johnny, a product design agent. You are looking at an existing product's codebase for the first time.
@@ -48,7 +57,7 @@ for (const r of pick.routes) console.log(`  -> ${r.route}: ${r.why}`);
 
 // Stage 2 context: chosen routes' files, own files first, then shared, until the budget runs out.
 const chosen = routes.filter((r) => pick.routes.some((p) => p.route === r.route));
-const ordered = [...new Set(chosen.flatMap((r) => [...own(r), ...r.files.filter((f) => !own(r).includes(f))]))];
+const ordered = [...new Set(chosen.flatMap((r) => [r.page, ...own(r), ...uiFirst(r.files.filter((f) => !own(r).includes(f)))]))];
 let used = 0;
 const included: string[] = [];
 for (const f of ordered) {
@@ -93,5 +102,6 @@ lap(`citations: ${checks.length - bad.length}/${checks.length} valid` + (bad.len
 
 fs.mkdirSync(OUT, { recursive: true });
 fs.writeFileSync(path.join(OUT, `target-${path.basename(root)}.json`),
-  JSON.stringify({ repo: root, pick, context: { included, omitted, chars: used }, decision, citations: checks }, null, 2));
+  JSON.stringify({ repo: root, seconds: (Date.now() - t0) / 1000, usage: { ...usage, usd: costUSD() }, pick, context: { included, omitted, chars: used }, decision, citations: checks }, null, 2));
 lap(`report: out/target-${path.basename(root)}.json`);
+console.log(`cost: ${usage.calls} calls, ${usage.input} in / ${usage.output} out tokens, $${costUSD().toFixed(2)}`);
