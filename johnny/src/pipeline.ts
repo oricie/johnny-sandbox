@@ -6,6 +6,7 @@ import { loadKnowledge } from "./observe/knowledge";
 import { loadSignals } from "./observe/signals";
 import { buildEvidencePacks } from "./decide/evidence";
 import { decide, decideRequest, type Decision } from "./decide/decide";
+import { decideByInvestigation } from "./decide/investigate";
 import { checkPlan } from "./guard/constraints";
 import { checkCitations } from "./guard/citations";
 import { buildSlackMessage } from "./report/slack";
@@ -46,7 +47,9 @@ export async function runJohnny(opts: RunOptions = {}): Promise<RunResult> {
 
   const decision: Decision = opts.decisionFile
     ? JSON.parse(fs.readFileSync(path.resolve(ROOT, opts.decisionFile), "utf8"))
-    : opts.request ? await decideRequest(packs, opts.request, opts.images) : await decide(packs);
+    : opts.request ? await decideRequest(packs, opts.request, opts.images)
+    // Own reviews investigate (pull code per suspicion); JOHNNY_DECIDE=budget reads it all at once instead.
+    : process.env.JOHNNY_DECIDE === "budget" ? await decide(packs) : await decideByInvestigation(packs, knowledge);
   fs.writeFileSync(path.join(OUT, "decision.json"), JSON.stringify(decision, null, 2));
   const c = checkCitations(decision, knowledge);
   const citations = { total: c.total, valid: c.total - c.invalid.length };

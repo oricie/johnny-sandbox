@@ -6,6 +6,7 @@ import { loadKnowledge } from "./observe/knowledge";
 import { loadSignals } from "./observe/signals";
 import { buildEvidencePacks } from "./decide/evidence";
 import { decide, type Decision } from "./decide/decide";
+import { decideByInvestigation } from "./decide/investigate";
 import { checkPlan } from "./guard/constraints";
 import { checkCitations } from "./guard/citations";
 
@@ -13,6 +14,7 @@ import { checkCitations } from "./guard/citations";
 // planted problems: the strong one (alert queue), the bait (D-12 containment), and the rules.
 const runsArg = process.argv.indexOf("--runs");
 const N = runsArg >= 0 ? Number(process.argv[runsArg + 1]) : 5;
+const investigating = process.argv.includes("--investigate");
 
 const knowledge = loadKnowledge();
 const packs = buildEvidencePacks(buildCodeGraph(), knowledge, loadSignals());
@@ -36,17 +38,17 @@ function score(d: Decision) {
 }
 
 const t0 = Date.now();
-const settled = await Promise.allSettled(Array.from({ length: N }, () => decide(packs)));
+const settled = await Promise.allSettled(Array.from({ length: N }, () => (investigating ? decideByInvestigation(packs, knowledge) : decide(packs))));
 const rows = settled.map((s, i) => s.status === "fulfilled"
   ? { run: i + 1, ...score(s.value) }
   : { run: i + 1, error: (s.reason as Error).message });
 
 fs.mkdirSync(OUT, { recursive: true });
-fs.writeFileSync(path.join(OUT, "eval.json"), JSON.stringify({ runs: N, seconds: (Date.now() - t0) / 1000, rows,
+fs.writeFileSync(path.join(OUT, investigating ? "eval-investigate.json" : "eval.json"), JSON.stringify({ runs: N, seconds: (Date.now() - t0) / 1000, rows,
   decisions: settled.map((s) => (s.status === "fulfilled" ? s.value : null)) }, null, 2));
 
 const ok = rows.filter((r) => !("error" in r)) as Exclude<(typeof rows)[number], { error: string }>[];
 const count = (k: "picked_queue" | "bait_recognised" | "bait_untouched" | "plans_ok") => `${ok.filter((r) => r[k]).length}/${N}`;
 console.table(rows);
 console.log(`picked alert queue ${count("picked_queue")} · bait recognised ${count("bait_recognised")} · ` +
-  `bait untouched ${count("bait_untouched")} · plans ok ${count("plans_ok")} · ${((Date.now() - t0) / 1000).toFixed(0)}s -> out/eval.json`);
+  `bait untouched ${count("bait_untouched")} · plans ok ${count("plans_ok")} · ${((Date.now() - t0) / 1000).toFixed(0)}s -> out/${investigating ? "eval-investigate" : "eval"}.json`);
