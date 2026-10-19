@@ -12,6 +12,7 @@ export interface OptionResult {
   deviations?: string[]; // changed files that were not in the option's plan
   shot?: string; // png path
   preview?: string; // live URL of this option's build
+  selfcheck?: { ok: boolean; issues: string[] }; // the screenshot checked against the summary and decisions
 }
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);

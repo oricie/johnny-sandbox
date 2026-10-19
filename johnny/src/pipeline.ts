@@ -14,6 +14,7 @@ import { implementOption } from "./act/implement";
 import { screenshot } from "./verify/screenshots";
 import { deployPreview } from "./verify/preview";
 import { compareToReference, type Comparison } from "./verify/compare";
+import { selfCheck } from "./verify/selfcheck";
 import { buildThreadPage, type OptionResult } from "./report/thread";
 
 export interface RunOptions {
@@ -92,6 +93,9 @@ export async function runJohnny(opts: RunOptions = {}): Promise<RunResult> {
     await screenshot(dir, screen, r.shot, port++);
     r.preview = await live(dir, `option ${r.option}${r.sha ? ` (${r.sha})` : ""}`);
   }
+  await Promise.all(results.filter((r) => r.shot).map(async (r) => {
+    r.selfcheck = await selfCheck(r.option, r.summary, r.shot!).catch((e) => ({ ok: false, issues: [`Couldn't check the screenshot: ${(e as Error).message}`] }));
+  }));
   const comparison = opts.images?.length
     ? await compareToReference(opts.images, results.filter((r) => r.shot).map((r) => ({ option: r.option, file: r.shot! })), opts.request ?? "")
         .catch((e) => { console.warn(`compare failed: ${(e as Error).message}`); return undefined; })

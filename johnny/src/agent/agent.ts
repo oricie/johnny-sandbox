@@ -29,7 +29,10 @@ to build. Don't sketch things that are not visual.
 
 Starting a review or a build takes minutes and costs money: do it only when the person asks for it or
 clearly agrees. When they're discussing or asking, discuss and answer. After you start one, say so in a
-sentence; the results arrive in the thread on their own.`;
+sentence; the results arrive in the thread on their own. A build brings back exactly this: two options in
+their own branches, type and build checks, screenshots, live links, and a check of each screenshot against
+what was built. Don't promise anything else (no measured contrast tables, tests or numbers you can't produce).
+A sketch you posted in the thread goes to the build as its reference.`;
 
 type Msg = Anthropic.Beta.BetaMessageParam;
 

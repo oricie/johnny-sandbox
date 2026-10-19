@@ -62,28 +62,35 @@ export async function implementOption(decision: Decision, option: Option, images
     .map((f) => fileBlock(f, ROOT)).join("\n\n");
   const prompt = (extra = "") =>
     `Chosen finding: ${decision.chosen_finding}\n\nOption ${option.id}: ${option.name}\n${option.approach}\n` +
+    `You're working on branch ${branch}; if you mention a branch, use that name.\n` +
     `Planned files: ${option.files_to_change.join(", ")}\n\n${context}\n\nCurrent source:\n` +
     appFiles(dir).map((f) => fileBlock(f, dir)).join("\n\n") + extra;
 
   const withImages = (text: string) => images.length
     ? [...imageBlocks(images), { type: "text" as const, text: `The images above are part of the brief (references, not pixel targets).\n\n${text}` }]
     : text;
-  let edit = await structured<Edit>(SYSTEM, withImages(prompt()), SCHEMA);
+  const edit = await structured<Edit>(SYSTEM, withImages(prompt()), SCHEMA);
   applyEdit(edit, dir);
   let checks = runChecks(dir);
+  let summary = edit.summary;
+  const changed = new Set(edit.files.map((f) => f.path));
 
-  // One repair round: show the failure and the files as they now are.
+  // One repair round: show the failure and the files as they now are. The option's summary stays the
+  // description of the option; the repair adds a line, and its files join the ones already changed.
   if (!checks.ok) {
-    edit = await structured<Edit>(SYSTEM, withImages(prompt(`\n\nYour previous edit failed the checks. Fix it.\n${checks.output}`)), SCHEMA);
-    applyEdit(edit, dir);
+    const fix = await structured<Edit>(SYSTEM, withImages(prompt(`\n\nYour previous edit failed the checks. Fix it. ` +
+      `In "summary", say only what you fixed, in one or two sentences.\n${checks.output}`)), SCHEMA);
+    applyEdit(fix, dir);
+    fix.files.forEach((f) => changed.add(f.path));
+    summary = `${edit.summary}\n\nFixed on the way: ${fix.summary}`;
     checks = runChecks(dir);
   }
-  if (!checks.ok) return { option: option.id, branch, dir, ok: false as const, summary: edit.summary, checks: checks.output };
+  if (!checks.ok) return { option: option.id, branch, dir, ok: false as const, summary, checks: checks.output };
 
-  const files = edit.files.map((f) => f.path);
+  const files = [...changed];
   // Allowed by constraints but not in the option's own plan: reported, not blocked.
   const deviations = files.filter((f) => !option.files_to_change.includes(f));
-  const sha = commitAll(dir, `Johnny: option ${option.id}, ${option.name}\n\n${edit.summary}`);
-  return { option: option.id, branch, dir, ok: true as const, sha, summary: edit.summary, checks: checks.output,
+  const sha = commitAll(dir, `Johnny: option ${option.id}, ${option.name}\n\n${summary}`);
+  return { option: option.id, branch, dir, ok: true as const, sha, summary, checks: checks.output,
     files, deviations };
 }

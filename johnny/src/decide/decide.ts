@@ -100,6 +100,7 @@ Rules:
   Slack. Use them as evidence and cite them. An "OPEN CONFLICT" means a written decision may be out of
   date: do not act on the unconfirmed side, and say the conflict must be resolved by a person first.
 - Propose exactly two options, A and B, that take different approaches to the root cause, not two styles of the same idea.
+- Don't name branches, file outputs or links: the system creates and reports them after building.
 - Options may only change files under demo-app/src/components, demo-app/src/screens or demo-app/src/styles.
   Use existing components and tokens from the design system.`;
 
@@ -131,6 +132,7 @@ const REQUEST_SCHEMA = {
 
 const REQUEST_SYSTEM = `You are Johnny, a product design agent working on an existing B2B product.
 A teammate asked for a change. Treat it like a design brief, not an order.
+Don't name branches, file outputs or links in what you write: the system creates and reports them after building.
 
 - Check the ask against the product decisions, personas, design system and usage evidence.
 - If doing it as asked would break an active decision or rule, set request_verdict.verdict to

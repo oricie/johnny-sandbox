@@ -11,7 +11,7 @@ import { sketch } from "../sketch";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
-import { backfillChannel } from "../learn/slackHistory";
+import { backfillChannel, importExport } from "../learn/slackHistory";
 import { learn } from "../learn/learn";
 import { openingMessage } from "../learn/opening";
 
@@ -54,6 +54,7 @@ const threads = new Set<string>(); // threads Johnny is part of: he answers ther
 let botUserId = "";
 
 const threadImages = new Map<string, string[]>(); // thread ts -> image files downloaded from it
+const threadSketches = new Map<string, string>(); // thread ts -> Johnny's latest sketch there, the build's reference
 
 // Downloads image attachments (needs files:read) so they can be shown to the model.
 async function downloadImages(files: { id?: string; mimetype?: string; url_private_download?: string; url_private?: string }[] = []) {
@@ -85,7 +86,8 @@ async function run(client: WebClient, channel: string, thread: string, request?:
   const status = await client.chat.postMessage({ channel, thread_ts: thread, text: "👀 Reading the product, the context and the usage data…" });
   const update = (text: string) => client.chat.update({ channel, ts: status.ts!, text });
   try {
-    const images = request ? threadImages.get(thread) ?? [] : [];
+    const sketchFile = threadSketches.get(thread);
+    const images = request ? [...(threadImages.get(thread) ?? []), ...(sketchFile ? [sketchFile] : [])] : [];
     const result = await runJohnny({
       request, images, act: true,
       onProgress: async (stage, detail) => {
@@ -101,7 +103,8 @@ async function run(client: WebClient, channel: string, thread: string, request?:
       ? [{ type: "section", text: { type: "mrkdwn", text: `${decision.request.verdict === "push_back" ? "✋" : "👍"} ${decision.request.explanation}` } }]
       : [];
     const outcome = results.map((r) => `*${r.option}:* ${r.ok ? `✅ ${r.checks}${r.preview ? ` · <${r.preview}|▶ open live>` : ""} · \`${r.branch}\` @ \`${r.sha}\`` : "❌ checks failed"}` +
-      (r.deviations?.length ? ` · ⚠️ outside the plan: ${r.deviations.map((f) => `\`${path.basename(f)}\``).join(", ")}` : ""));
+      (r.deviations?.length ? ` · ⚠️ outside the plan: ${r.deviations.map((f) => `\`${path.basename(f)}\``).join(", ")}` : "") +
+      (r.selfcheck ? (r.selfcheck.ok ? " · 🔎 screenshot matches what I wrote" : `\n   ⚠️ The screenshot doesn't match what I wrote: ${r.selfcheck.issues.join(" ")}`) : ""));
     await update("Done.");
     await client.chat.postMessage({
       channel, thread_ts: thread, text: decision.chosen_finding,
@@ -196,11 +199,16 @@ async function catchUp(client: WebClient, channel: string, thread?: string) {
   catchingUp.add(channel);
   void (async () => {
     try {
-      const read = await backfillChannel(client, channel, { days: 90, botUserId });
+      // Demo mode: a workspace export stands in for the channel's history (Slack can't post backdated
+      // messages, so a fresh demo workspace has none). He says so in the message.
+      const demo = process.env.JOHNNY_DEMO_HISTORY;
+      const read = demo ? importExport(path.resolve(ROOT, demo)) : [await backfillChannel(client, channel, { days: 90, botUserId })];
       log("catch-up read", channel, read);
       const l = await learn();
-      const opening = await openingMessage(l.knowledge, { channels: [`#${read.channel}`], messages: read.messages, weeks: read.weeks });
-      await client.chat.postMessage({ channel, ...(thread ? { thread_ts: thread } : {}), text: opening.text });
+      const opening = await openingMessage(l.knowledge, { channels: read.map((r) => `#${r.channel}`),
+        messages: read.reduce((n, r) => n + r.messages, 0), weeks: Math.max(...read.map((r) => r.weeks)) });
+      await client.chat.postMessage({ channel, ...(thread ? { thread_ts: thread } : {}),
+        text: opening.text + (demo ? "\n\n_(Demo: read from a sample history of #product, #support and #design.)_" : "") });
     } catch (e) {
       log("ERROR in catch-up", (e as Error).stack);
       await client.chat.postMessage({ channel, ...(thread ? { thread_ts: thread } : {}), text: `I couldn't finish reading the channel: ${(e as Error).message.slice(0, 200)}` }).catch(() => {});
@@ -231,6 +239,7 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
     },
     sketch: async (change, route) => {
       const s = await sketch(change, route, threadImages.get(thread) ?? []);
+      threadSketches.set(thread, s.file);
       await client.files.uploadV2({ channel_id: channel, thread_ts: thread, initial_comment: `✏️ Sketch: ${s.notes}`,
         file_uploads: [{ file: s.file, filename: "sketch.png" }] });
       return `Sketch posted in the thread. What you changed: ${s.notes}. Ask whether to build it (a full build with two options takes 2-3 minutes).`;
