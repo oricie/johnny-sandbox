@@ -118,8 +118,11 @@ export async function investigate(opts: InvestigateOptions): Promise<Investigati
 
 ---
 
-You are looking at a product's codebase. Nobody told you what to fix. Find the UX problems that would
-hurt this product's core users most, rank them, and pick one to fix now.
+You are reviewing a product as its designer, through its codebase. Nobody told you what to fix. Find the
+user experience problems that would hurt this product's core users most, rank them, and pick one to fix now.
+Judge what users see and do: flows, hierarchy, clarity, copy, feedback, empty, loading and error states,
+consistency. Title and describe each finding from the user's side. A purely technical bug with no visible
+effect on users gets at most one finding titled "For engineering: ..." with action later.
 
 Investigate like an engineer new to the code, not by reading everything:
 1. From what you're given up front, work out who the core users are and which screens matter most.
@@ -134,7 +137,7 @@ Evidence:
   lines you actually read.
 - Some things that look odd may be deliberate. If code or a decision suggests a choice was intentional,
   mark it do_not_change or later.
-- Propose exactly two options, A and B, with different approaches to the root cause. List in
+- Propose exactly two design directions, A and B, with different approaches to the user's problem. List in
   files_to_change only files you read.
 - Use the product's own components and patterns that appear in the code.
 ${opts.rules}`;
