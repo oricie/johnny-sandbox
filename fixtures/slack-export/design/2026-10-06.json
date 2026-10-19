@@ -1,0 +1,17 @@
+[
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "Reminder that the severity decision from 26/8 is still not in the product. Queue still shows grey text severity. It's been 6 weeks.",
+  "ts": "1791295220.000000",
+  "thread_ts": "1791295220.000000",
+  "reply_count": 1
+ },
+ {
+  "type": "message",
+  "user": "U07YAEL",
+  "text": "It's on me now, Tom moved it. This sprint.",
+  "ts": "1791295820.000000",
+  "thread_ts": "1791295220.000000"
+ }
+]

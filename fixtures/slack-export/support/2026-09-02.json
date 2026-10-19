@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Northwind ticket NW-2340: a credential dump on DC-01 sat in the queue for 20 min under PowerShell noise from a test box. Their CISO is now involved.",
+  "ts": "1788346808.000000",
+  "thread_ts": "1788346808.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "Ouch. The queue sorts only by time, so a burst of low-severity noise pushes everything down.",
+  "ts": "1788347408.000000",
+  "thread_ts": "1788346808.000000"
+ },
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "This is exactly the Q3 metric. Let's talk Thursday.",
+  "ts": "1788348008.000000",
+  "thread_ts": "1788346808.000000"
+ }
+]

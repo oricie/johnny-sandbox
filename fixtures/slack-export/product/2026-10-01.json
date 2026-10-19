@@ -1,0 +1,31 @@
+[
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "For the Acme expansion: let's hide duplicate alerts by default in the queue (show only the latest of each fingerprint), with a toggle to show all. They want the noise gone.",
+  "ts": "1790852418.000000",
+  "thread_ts": "1790852418.000000",
+  "reply_count": 3
+ },
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "Doesn't that clash with the 'every raw alert stays visible' rule?",
+  "ts": "1790853018.000000",
+  "thread_ts": "1790852418.000000"
+ },
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "It's a toggle, they can still see everything. Let's do it for Acme.",
+  "ts": "1790853618.000000",
+  "thread_ts": "1790852418.000000"
+ },
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Careful, Northwind's auditors specifically check that nothing is hidden by default.",
+  "ts": "1790854218.000000",
+  "thread_ts": "1790852418.000000"
+ }
+]

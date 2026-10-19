@@ -1,0 +1,8 @@
+[
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Acme asked whether we can sort the queue by severity. Told them it's newest-first for now. Ticket AC-118.",
+  "ts": "1787389203.000000"
+ }
+]

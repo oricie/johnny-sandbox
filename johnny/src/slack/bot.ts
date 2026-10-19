@@ -11,6 +11,9 @@ import { sketch } from "../sketch";
 import { buildSlackMessage } from "../report/slack";
 import { checkCitations } from "../guard/citations";
 import { loadKnowledge } from "../observe/knowledge";
+import { backfillChannel } from "../learn/slackHistory";
+import { learn } from "../learn/learn";
+import { openingMessage } from "../learn/opening";
 
 // Johnny in Slack, over Socket Mode (no public URL needed).
 //   /johnny review            -> proactive review of the product
@@ -185,6 +188,29 @@ async function threadHistory(client: WebClient, channel: string, thread: string,
   return [{ role: "user", text: latest }];
 }
 
+// His first hour in a channel: read its history, learn from it, check decisions against the product,
+// and post what he found. Once per channel unless asked again.
+const catchingUp = new Set<string>();
+async function catchUp(client: WebClient, channel: string, thread?: string) {
+  if (catchingUp.has(channel)) return "Already reading this channel; the summary will be posted when it's done.";
+  catchingUp.add(channel);
+  void (async () => {
+    try {
+      const read = await backfillChannel(client, channel, { days: 90, botUserId });
+      log("catch-up read", channel, read);
+      const l = await learn();
+      const opening = await openingMessage(l.knowledge, { channels: [`#${read.channel}`], messages: read.messages, weeks: read.weeks });
+      await client.chat.postMessage({ channel, ...(thread ? { thread_ts: thread } : {}), text: opening.text });
+    } catch (e) {
+      log("ERROR in catch-up", (e as Error).stack);
+      await client.chat.postMessage({ channel, ...(thread ? { thread_ts: thread } : {}), text: `I couldn't finish reading the channel: ${(e as Error).message.slice(0, 200)}` }).catch(() => {});
+    } finally {
+      catchingUp.delete(channel);
+    }
+  })();
+  return "Started reading the channel's last 90 days. The summary will be posted in the channel in a few minutes.";
+}
+
 // Every message is a turn in a conversation with Johnny. He decides whether to answer,
 // look things up, or start a review or a build (through his tools).
 async function handle(text: string, client: WebClient, channel: string, thread: string, say: SayFn) {
@@ -209,6 +235,7 @@ async function handle(text: string, client: WebClient, channel: string, thread: 
         file_uploads: [{ file: s.file, filename: "sketch.png" }] });
       return `Sketch posted in the thread. What you changed: ${s.notes}. Ask whether to build it (a full build with two options takes 2-3 minutes).`;
     },
+    catchUp: () => catchUp(client, channel, thread),
     startPrototype: async (brief, variants) => {
       if (busy) return "Busy: another run is in progress. Tell the person to try again in a couple of minutes.";
       void runPrototype(client, channel, thread, brief, variants);
@@ -265,6 +292,15 @@ app.action(/^(approve_a|approve_b|revise)$/, async ({ ack, action, body, client 
   } catch (e) {
     await client.chat.postMessage({ channel, thread_ts: thread, text: `Approved, but pushing the branch failed: ${(e as Error).message.slice(0, 300)}` });
   }
+});
+
+// Added to a channel: introduce himself, then read its history and come back with what he found.
+app.event("member_joined_channel", async ({ event, client }) => {
+  if (event.user !== botUserId) return;
+  log("joined", event.channel);
+  await client.chat.postMessage({ channel: event.channel,
+    text: "Hi, I'm Johnny, the team's product designer. I'm reading this channel's last 90 days so I know what's been said and decided. I'll be back here in a few minutes with what I found." });
+  await catchUp(client, event.channel);
 });
 
 // Agent: Slack's assistant pane. Each conversation is its own thread.

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ROOT, OUT } from "../paths";
+import { historySources } from "./slackHistory";
 
 // Every source normalised to the same shape: an id, where it came from, when, and readable text.
 // Adding Gong/Zendesk/etc. for real means replacing these loaders with API calls.
@@ -43,6 +44,8 @@ export function loadSources(): SourceDoc[] {
     else if (d.source === "zendesk") out.push(...zendesk(d));
     else if (d.source === "slack") out.push(slackExport(f, d));
   }
+  // Channel history he read when he joined (or from a workspace export), one source per channel per week.
+  out.push(...historySources());
   // What Johnny heard in Slack channels he's invited to, one source per day.
   const inbox = path.join(OUT, "slack-inbox.jsonl");
   if (fs.existsSync(inbox)) {

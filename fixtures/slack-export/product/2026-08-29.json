@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U06BEN",
+  "text": "Prospect (Fintech, 40 analysts) asked for a 'Reports' tab in the main nav with weekly stats. Could be a deal-maker.",
+  "ts": "1787997607.000000",
+  "thread_ts": "1787997607.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "D-15: no new top-level nav this year. If we do weekly stats it goes into Overview.",
+  "ts": "1787998207.000000",
+  "thread_ts": "1787997607.000000"
+ },
+ {
+  "type": "message",
+  "user": "U06BEN",
+  "text": "Understood, I'll position it as Overview.",
+  "ts": "1787998807.000000",
+  "thread_ts": "1787997607.000000"
+ }
+]

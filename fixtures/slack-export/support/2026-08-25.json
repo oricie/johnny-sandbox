@@ -1,0 +1,17 @@
+[
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Helix: \"is there a way to export an incident timeline as PDF for our auditors?\" Ticket HX-77.",
+  "ts": "1787673604.000000",
+  "thread_ts": "1787673604.000000",
+  "reply_count": 1
+ },
+ {
+  "type": "message",
+  "user": "U05LIOR",
+  "text": "Acme asked for the same thing last month, for their SOC2 audit.",
+  "ts": "1787674204.000000",
+  "thread_ts": "1787673604.000000"
+ }
+]

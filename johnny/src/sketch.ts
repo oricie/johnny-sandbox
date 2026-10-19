@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
-import { chromium } from "playwright";
+import { launchBrowser } from "./browser";
 import { ROOT, OUT } from "./paths";
 import { structured, imageBlocks } from "./llm";
 
@@ -10,7 +10,7 @@ import { structured, imageBlocks } from "./llm";
 // Static (no behaviour, no checks): it shows how it would look, so people can react before he builds.
 
 const VITE = path.join(ROOT, "node_modules/.bin/vite");
-const launch = () => chromium.launch(process.env.PLAYWRIGHT_BROWSERS_PATH ? { executablePath: `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium` } : {});
+const launch = launchBrowser;
 
 async function currentScreen(route: string) {
   const app = path.join(ROOT, "demo-app");

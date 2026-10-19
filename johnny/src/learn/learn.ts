@@ -3,6 +3,7 @@ import path from "node:path";
 import { ROOT } from "../paths";
 import { structured } from "../llm";
 import { loadSources, type SourceDoc } from "./sources";
+import { buildCodeGraph } from "../observe/codeGraph";
 
 // Johnny's learning: sources -> atomic observations -> consolidated knowledge, with conflicts against
 // the written decisions flagged for a person. Incremental: only new sources are read, and new
@@ -32,16 +33,16 @@ export function loadLearned(): Knowledge {
 
 interface Observation { type: Entry["type"]; statement: string; quote: string; who: string; account: string; screen: string }
 
-const EXTRACT = `Read one source (a customer call, support tickets, a research session or a team chat) about the
+const extractPrompt = (routes: string[]) => `Read one source (a customer call, support tickets, a research session or a team chat) about the
 product and pull out atomic observations that matter for the product's design: pains, requests,
 decisions the team made, facts about how users work, and observed behaviour.
 - One observation per point. "statement" is your neutral summary; "quote" is the exact words from the source.
 - "who" is the speaker with role and company if known. "account" is the customer company or "internal".
-- "screen" is the product route it concerns (/overview, /alerts, /incident) or "" if none.
+- "screen" is the product route it concerns (${routes.join(", ")}) or "" if none.
 - Skip small talk and anything not about the product. Do not infer beyond what was said.`;
 
-async function extract(doc: SourceDoc): Promise<Observation[]> {
-  const r = await structured<{ observations: Observation[] }>(EXTRACT,
+async function extract(doc: SourceDoc, routes: string[]): Promise<Observation[]> {
+  const r = await structured<{ observations: Observation[] }>(extractPrompt(routes),
     `Source ${doc.id} (${doc.kind}, ${doc.date}): ${doc.title}\n\n${doc.text}`,
     { type: "object", additionalProperties: false, required: ["observations"], properties: { observations: { type: "array", items: {
       type: "object", additionalProperties: false, required: ["type", "statement", "quote", "who", "account", "screen"],
@@ -68,7 +69,8 @@ export async function learn(onProgress?: (s: string) => void): Promise<{ knowled
   if (!fresh.length) return { knowledge: known, newSources: 0, newEntries: 0, newConflicts: 0 };
   onProgress?.(`Reading ${fresh.length} new source(s)…`);
 
-  const observed = (await Promise.all(fresh.map(async (d) => (await extract(d)).map((o) => ({ ...o, source: d.id, date: d.date })))))
+  const routes = buildCodeGraph().routes.map((r) => r.path);
+  const observed = (await Promise.all(fresh.map(async (d) => (await extract(d, routes)).map((o) => ({ ...o, source: d.id, date: d.date })))))
     .flat();
   onProgress?.(`${observed.length} observations. Consolidating…`);
 

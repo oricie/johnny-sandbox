@@ -1,0 +1,17 @@
+[
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "FYI the API already returns asset, assetCriticality and fingerprint for every alert. So both queue options are frontend-only.",
+  "ts": "1789653614.000000",
+  "thread_ts": "1789653614.000000",
+  "reply_count": 1
+ },
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "Great, that makes it cheaper.",
+  "ts": "1789654214.000000",
+  "thread_ts": "1789653614.000000"
+ }
+]

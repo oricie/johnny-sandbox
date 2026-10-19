@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import type Anthropic from "@anthropic-ai/sdk";
-import { chromium, type Browser, type Page } from "playwright";
+import type { Browser, Page } from "playwright";
+import { launchBrowser } from "../browser";
 import { CHARTER } from "../charter";
 import { client, MODEL, structured, track } from "../llm";
 
@@ -75,7 +76,7 @@ const REVIEW_SCHEMA = {
   },
 } as const;
 
-const launch = () => chromium.launch(process.env.PLAYWRIGHT_BROWSERS_PATH ? { executablePath: `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium` } : {});
+const launch = launchBrowser;
 
 // Numbers the visible interactive elements, tags them with data-johnny-n, and returns where they are.
 async function markElements(page: Page): Promise<Marked[]> {

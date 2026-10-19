@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "PageHeader subtitle uses a hardcoded #b8bcc4. That's ~1.9:1 on our light background, fails AA badly. Should be --color-text-muted.",
+  "ts": "1787832006.000000",
+  "thread_ts": "1787832006.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U07YAEL",
+  "text": "Will fix when I'm in there. Not urgent?",
+  "ts": "1787832606.000000",
+  "thread_ts": "1787832006.000000"
+ },
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "It's on every screen. I'd call it urgent-ish.",
+  "ts": "1787833206.000000",
+  "thread_ts": "1787832006.000000"
+ }
+]

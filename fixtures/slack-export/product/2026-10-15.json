@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "Q3 retro: MTTT for criticals still ~21 min. We didn't ship the queue changes. October is the month.",
+  "ts": "1792062023.000000",
+  "thread_ts": "1792062023.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "Agreed. Queue + severity badges together.",
+  "ts": "1792062623.000000",
+  "thread_ts": "1792062023.000000"
+ },
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "And please don't hide duplicates by default until we've settled the D-07 question.",
+  "ts": "1792063223.000000",
+  "thread_ts": "1792062023.000000"
+ }
+]

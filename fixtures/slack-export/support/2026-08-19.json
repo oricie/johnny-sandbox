@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Northwind again: \"we opened 40 alerts to find the 3 that mattered\". Third time this month from them. Ticket NW-2291.",
+  "ts": "1787148001.000000",
+  "thread_ts": "1787148001.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U05LIOR",
+  "text": "Same from Helix on our QBR. Their SOC lead literally said the queue is 'a wall of grey'.",
+  "ts": "1787148601.000000",
+  "thread_ts": "1787148001.000000"
+ },
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Tagging as alert-noise.",
+  "ts": "1787149201.000000",
+  "thread_ts": "1787148001.000000"
+ }
+]

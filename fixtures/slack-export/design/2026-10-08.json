@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "Proposal: --color-text-muted is #5b6270. For dark mode later we'd need a pair. Can we agree now that all text colours go through 3 tokens (default, muted, inverse)?",
+  "ts": "1791453621.000000",
+  "thread_ts": "1791453621.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U07YAEL",
+  "text": "Fine by me.",
+  "ts": "1791454221.000000",
+  "thread_ts": "1791453621.000000"
+ },
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "Agreed, as long as it doesn't delay the queue work.",
+  "ts": "1791454821.000000",
+  "thread_ts": "1791453621.000000"
+ }
+]

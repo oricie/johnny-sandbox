@@ -1,0 +1,17 @@
+[
+ {
+  "type": "message",
+  "user": "U03NOA",
+  "text": "Analysts keep asking why 'Isolate host' is greyed out. The tooltip explains it but nobody hovers. 4 tickets this week.",
+  "ts": "1788872410.000000",
+  "thread_ts": "1788872410.000000",
+  "reply_count": 1
+ },
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "That's D-12, only incident leads isolate. The rule stays. But the explanation could be visible, not a tooltip.",
+  "ts": "1788873010.000000",
+  "thread_ts": "1788872410.000000"
+ }
+]

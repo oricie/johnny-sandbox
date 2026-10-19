@@ -69,7 +69,8 @@
         "message.groups",
         "assistant_thread_started",
         "assistant_thread_context_changed",
-        "message.im"
+        "message.im",
+        "member_joined_channel"
       ]
     },
     "interactivity": {

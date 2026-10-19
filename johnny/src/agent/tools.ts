@@ -15,6 +15,7 @@ export interface AgentHooks {
   startPrototype: (brief: string, variants: number) => Promise<string>; // exploration prototypes; results go to the thread
   sketch: (change: string, route: string) => Promise<string>; // quick visual mockup, posted to the thread
   status: () => Record<string, unknown>;
+  catchUp: () => Promise<string>; // read this channel's history, learn from it, post what he found
 }
 
 export const TOOL_DEFS = [
@@ -49,6 +50,11 @@ export const TOOL_DEFS = [
   {
     name: "learn_now",
     description: "Read new sources (calls, tickets, research, and what you heard in Slack) and update your knowledge. Takes about a minute. Use when asked to learn or catch up, or when new material was shared.",
+    input_schema: { type: "object", additionalProperties: false, properties: {}, required: [] },
+  },
+  {
+    name: "catch_up",
+    description: "Read this channel's history (the last 90 days), learn from it, check the decisions in it against the product, and post what you found in the channel. Takes a few minutes. Use when asked to read or catch up on a channel, or right after being added to one.",
     input_schema: { type: "object", additionalProperties: false, properties: {}, required: [] },
   },
   {
@@ -138,6 +144,8 @@ export async function runTool(name: string, input: Record<string, unknown>, hook
     }
     case "status":
       return JSON.stringify(hooks.status());
+    case "catch_up":
+      return hooks.catchUp();
     case "start_review":
       return hooks.startRun();
     case "start_request":

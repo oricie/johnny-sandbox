@@ -1,0 +1,17 @@
+[
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "Q3 goal reminder: mean time to triage critical alerts on crown-jewel assets under 5 min. Today we're around 20. Everything we pick this quarter should move that number.",
+  "ts": "1787047200.000000",
+  "thread_ts": "1787047200.000000",
+  "reply_count": 1
+ },
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "Agreed. Most of that time is analysts digging through the queue, not the investigation itself.",
+  "ts": "1787047800.000000",
+  "thread_ts": "1787047200.000000"
+ }
+]

@@ -1,0 +1,8 @@
+[
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "Badge with severity variant: drafted the spec. Variants: critical/high/medium/low using --color-sev-*, plus text. Critical rows on crown-jewel assets get --color-sev-critical-bg. Nobody has picked it up yet.",
+  "ts": "1790071215.000000"
+ }
+]

@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U07YAEL",
+  "text": "Question for design: do we want a dark theme at some point? Two customers run their SOC in dark rooms and asked.",
+  "ts": "1789034411.000000",
+  "thread_ts": "1789034411.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "If we do, tokens first: every colour in components must come from tokens.css. Right now PageHeader and a few others hardcode hex, which would break dark mode.",
+  "ts": "1789035011.000000",
+  "thread_ts": "1789034411.000000"
+ },
+ {
+  "type": "message",
+  "user": "U07YAEL",
+  "text": "OK so the hex cleanup is a prerequisite either way.",
+  "ts": "1789035611.000000",
+  "thread_ts": "1789034411.000000"
+ }
+]

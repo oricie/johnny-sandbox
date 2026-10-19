@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "Decision from today's design review: severity is always shown with the sev colour token AND the word, everywhere (queue, overview, incident). Eli's proposal. @Tom Brenner can we get it into the queue this quarter?",
+  "ts": "1787756405.000000",
+  "thread_ts": "1787756405.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "Yes, I'll put it on the Q3 list. Small change.",
+  "ts": "1787757005.000000",
+  "thread_ts": "1787756405.000000"
+ },
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "I'll write it into design-system.md too.",
+  "ts": "1787757605.000000",
+  "thread_ts": "1787756405.000000"
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "name": "design",
+  "id": "C_DESIGN"
+ },
+ {
+  "name": "product",
+  "id": "C_PRODUCT"
+ },
+ {
+  "name": "support",
+  "id": "C_SUPPORT"
+ }
+]

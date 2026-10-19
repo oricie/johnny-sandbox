@@ -1,0 +1,24 @@
+[
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "Looking at the alert queue: severity is plain text in the same grey as everything else. We have --color-sev-* tokens in tokens.css that nobody uses. Proposal: severity always shows as a coloured badge + the word. Never colour alone (colour-blind analysts).",
+  "ts": "1787223602.000000",
+  "thread_ts": "1787223602.000000",
+  "reply_count": 2
+ },
+ {
+  "type": "message",
+  "user": "U07YAEL",
+  "text": "Badge.tsx only has one neutral style right now, so this needs a severity variant.",
+  "ts": "1787224202.000000",
+  "thread_ts": "1787223602.000000"
+ },
+ {
+  "type": "message",
+  "user": "U04ELI",
+  "text": "Yes, a variant, not a new component.",
+  "ts": "1787224802.000000",
+  "thread_ts": "1787223602.000000"
+ }
+]

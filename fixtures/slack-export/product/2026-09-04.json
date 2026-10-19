@@ -1,0 +1,17 @@
+[
+ {
+  "type": "message",
+  "user": "U01MAYA",
+  "text": "Thursday sync notes: (1) Queue ordering: options are sort by severity+asset criticality, or collapse duplicates by fingerprint. Leaning to sorting first. (2) Severity badges (decided 26/8) still not done. (3) PDF timeline export: 3 customers now, parking until Q4.",
+  "ts": "1788534009.000000",
+  "thread_ts": "1788534009.000000",
+  "reply_count": 1
+ },
+ {
+  "type": "message",
+  "user": "U02TOM",
+  "text": "On (2): sorry, slipped behind the API work. Still planned.",
+  "ts": "1788534609.000000",
+  "thread_ts": "1788534009.000000"
+ }
+]

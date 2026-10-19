@@ -1,0 +1,58 @@
+[
+ {
+  "id": "U01MAYA",
+  "name": "maya",
+  "real_name": "Maya Levi",
+  "profile": {
+   "title": "Head of Product"
+  }
+ },
+ {
+  "id": "U02TOM",
+  "name": "tom",
+  "real_name": "Tom Brenner",
+  "profile": {
+   "title": "Engineering Lead"
+  }
+ },
+ {
+  "id": "U03NOA",
+  "name": "noa",
+  "real_name": "Noa Katz",
+  "profile": {
+   "title": "Support Lead"
+  }
+ },
+ {
+  "id": "U04ELI",
+  "name": "eli",
+  "real_name": "Eli Shapiro",
+  "profile": {
+   "title": "Designer (part-time)"
+  }
+ },
+ {
+  "id": "U05LIOR",
+  "name": "lior",
+  "real_name": "Lior Ben-David",
+  "profile": {
+   "title": "Customer Success"
+  }
+ },
+ {
+  "id": "U06BEN",
+  "name": "ben",
+  "real_name": "Ben Cooper",
+  "profile": {
+   "title": "Sales"
+  }
+ },
+ {
+  "id": "U07YAEL",
+  "name": "yael",
+  "real_name": "Yael Stern",
+  "profile": {
+   "title": "Frontend Engineer"
+  }
+ }
+]

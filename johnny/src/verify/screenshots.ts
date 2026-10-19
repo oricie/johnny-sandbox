@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from "node:child_process";
 import path from "node:path";
-import { chromium } from "playwright";
+import { launchBrowser } from "../browser";
 import { ROOT } from "../paths";
 
 const VITE = path.join(ROOT, "node_modules/.bin/vite");
@@ -22,7 +22,7 @@ export async function screenshotMany(dir: string, shots: { route: string; file: 
   const server = spawn(VITE, ["preview", "--port", String(port), "--strictPort"], { cwd: app, stdio: "ignore" });
   try {
     await waitFor(`http://localhost:${port}/`);
-    const browser = await chromium.launch(process.env.PLAYWRIGHT_BROWSERS_PATH ? { executablePath: `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium` } : {});
+    const browser = await launchBrowser();
     const page = await browser.newPage({ viewport: { width: 1100, height: 720 } });
     for (const s of shots) {
       await page.goto(`http://localhost:${port}/#${s.route}`);
@@ -44,7 +44,7 @@ export async function screenshot(dir: string, route: string, file: string, port:
   const server = spawn(VITE, ["preview", "--port", String(port), "--strictPort"], { cwd: app, stdio: "ignore" });
   try {
     await waitFor(`http://localhost:${port}/`);
-    const browser = await chromium.launch(process.env.PLAYWRIGHT_BROWSERS_PATH ? { executablePath: `${process.env.PLAYWRIGHT_BROWSERS_PATH}/chromium` } : {});
+    const browser = await launchBrowser();
     const page = await browser.newPage({ viewport: { width: 1100, height: 620 } });
     await page.goto(`http://localhost:${port}/#${route}`);
     await page.waitForTimeout(800);
