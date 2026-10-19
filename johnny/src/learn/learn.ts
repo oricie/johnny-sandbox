@@ -31,7 +31,7 @@ export function loadLearned(): Knowledge {
   catch { return { updated: "", processed: [], entries: [], conflicts: [] }; }
 }
 
-interface Observation { type: Entry["type"]; statement: string; quote: string; who: string; account: string; screen: string }
+interface Observation { type: Entry["type"]; statement: string; quote: string; who: string; account: string; screen: string; date: string }
 
 const extractPrompt = (routes: string[]) => `Read one source (a customer call, support tickets, a research session or a team chat) about the
 product and pull out atomic observations that matter for the product's design: pains, requests,
@@ -39,15 +39,16 @@ decisions the team made, facts about how users work, and observed behaviour.
 - One observation per point. "statement" is your neutral summary; "quote" is the exact words from the source.
 - "who" is the speaker with role and company if known. "account" is the customer company or "internal".
 - "screen" is the product route it concerns (${routes.join(", ")}) or "" if none.
+- "date" is the day it was said as YYYY-MM-DD when the source shows it (chats show [YYYY-MM-DD] per message), else "".
 - Skip small talk and anything not about the product. Do not infer beyond what was said.`;
 
 async function extract(doc: SourceDoc, routes: string[]): Promise<Observation[]> {
   const r = await structured<{ observations: Observation[] }>(extractPrompt(routes),
     `Source ${doc.id} (${doc.kind}, ${doc.date}): ${doc.title}\n\n${doc.text}`,
     { type: "object", additionalProperties: false, required: ["observations"], properties: { observations: { type: "array", items: {
-      type: "object", additionalProperties: false, required: ["type", "statement", "quote", "who", "account", "screen"],
+      type: "object", additionalProperties: false, required: ["type", "statement", "quote", "who", "account", "screen", "date"],
       properties: { type: { type: "string", enum: ["pain", "request", "decision", "fact", "behaviour"] },
-        statement: { type: "string" }, quote: { type: "string" }, who: { type: "string" }, account: { type: "string" }, screen: { type: "string" } },
+        statement: { type: "string" }, quote: { type: "string" }, who: { type: "string" }, account: { type: "string" }, screen: { type: "string" }, date: { type: "string" } },
     } } } }, "low");
   return r.observations;
 }
@@ -70,7 +71,7 @@ export async function learn(onProgress?: (s: string) => void): Promise<{ knowled
   onProgress?.(`Reading ${fresh.length} new source(s)…`);
 
   const routes = buildCodeGraph().routes.map((r) => r.path);
-  const observed = (await Promise.all(fresh.map(async (d) => (await extract(d, routes)).map((o) => ({ ...o, source: d.id, date: d.date })))))
+  const observed = (await Promise.all(fresh.map(async (d) => (await extract(d, routes)).map((o) => ({ ...o, source: d.id, date: /^\d{4}-\d{2}-\d{2}$/.test(o.date) ? o.date : d.date })))))
     .flat();
   onProgress?.(`${observed.length} observations. Consolidating…`);
 

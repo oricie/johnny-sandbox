@@ -65,7 +65,10 @@ export async function backfillChannel(client: WebClient, channelId: string, opts
       const r = await client.conversations.replies({ channel: channelId, ts: m.ts!, limit: 200 });
       replies = ((r.messages ?? []) as Raw[]).slice(1).filter(human);
     }
-    for (const x of [m, ...replies]) await resolve(x.user);
+    for (const x of [m, ...replies]) {
+      await resolve(x.user);
+      for (const [, id] of (x.text ?? "").matchAll(/<@([A-Z0-9]+)>/g)) await resolve(id);
+    }
     messages.push({ user: name(m.user!), ts: m.ts!, text: readable(m.text!, name),
       ...(replies.length ? { replies: replies.map((x) => ({ user: name(x.user!), ts: x.ts!, text: readable(x.text!, name) })) } : {}) });
   }

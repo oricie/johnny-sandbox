@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-15T11:47:14.715Z",
+  "updated": "2026-10-19T12:02:34.371Z",
   "processed": [
     "gong-8812",
     "gong-9034",
@@ -9,14 +9,33 @@
     "ZD-4462",
     "ZD-4490",
     "ZD-4527",
-    "ZD-4551"
+    "ZD-4551",
+    "slack:#design:2026-08-17",
+    "slack:#design:2026-08-24",
+    "slack:#design:2026-09-07",
+    "slack:#design:2026-09-21",
+    "slack:#design:2026-10-05",
+    "slack:#product:2026-08-17",
+    "slack:#product:2026-08-24",
+    "slack:#product:2026-08-31",
+    "slack:#product:2026-09-14",
+    "slack:#product:2026-09-28",
+    "slack:#product:2026-10-12",
+    "slack:#support:2026-08-17",
+    "slack:#support:2026-08-24",
+    "slack:#support:2026-08-31",
+    "slack:#support:2026-09-07",
+    "slack:#support:2026-09-14",
+    "slack:#support:2026-09-21",
+    "slack:#support:2026-09-28",
+    "slack:#support:2026-10-12"
   ],
   "entries": [
     {
       "id": "K-001",
       "type": "pain",
       "title": "Critical alerts get buried under low-severity noise in the alert queue",
-      "statement": "The alert queue carries high volume with few relevant alerts, and critical alerts on important assets end up below large numbers of low-severity alerts. In one case a critical alert waited 40 minutes at night.",
+      "statement": "The alert queue carries high volume with few relevant alerts, so critical alerts on important assets end up below large numbers of low-severity alerts, often PowerShell noise from test boxes. Examples: a critical alert waited 40 minutes at night, a credential dump on DC-01 waited 20 minutes, one account opened 40 alerts to find 3 that mattered, and a Helix screenshot shows 12 low PowerShell alerts on top. Engineering says most triage time is spent digging through the queue, not investigating.",
       "screens": [
         "/alerts"
       ],
@@ -44,14 +63,46 @@
           "quote": "It was below 60 low alerts from a scanner.",
           "who": "SOC analyst, Northwind Health",
           "date": "2026-09-04"
+        },
+        {
+          "source": "slack:#product:2026-08-17",
+          "quote": "Most of that time is analysts digging through the queue, not the investigation itself.",
+          "who": "Tom Brenner (Engineering Lead)",
+          "date": "2026-08-18"
+        },
+        {
+          "source": "slack:#support:2026-08-17",
+          "quote": "we opened 40 alerts to find the 3 that mattered",
+          "who": "Noa Katz (Support Lead), relaying Northwind",
+          "date": "2026-08-19"
+        },
+        {
+          "source": "slack:#support:2026-08-31",
+          "quote": "Northwind ticket NW-2340: a credential dump on DC-01 sat in the queue for 20 min under PowerShell noise from a test box. Their CISO is now involved.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-09-02"
+        },
+        {
+          "source": "slack:#support:2026-09-28",
+          "quote": "Helix ticket HX-102: same 'can't find the critical alerts' complaint.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-10-03"
+        },
+        {
+          "source": "slack:#support:2026-09-28",
+          "quote": "Attaching their screenshot of a queue page with 12 low-severity PowerShell alerts on top.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-10-03"
         }
       ],
       "accounts": [
-        "Northwind Health"
+        "Northwind Health",
+        "Helix",
+        "internal"
       ],
-      "strength": "repeated",
-      "first_seen": "2026-09-04",
-      "last_seen": "2026-09-18"
+      "strength": "widespread",
+      "first_seen": "2026-08-18",
+      "last_seen": "2026-10-03"
     },
     {
       "id": "K-002",
@@ -73,13 +124,20 @@
           "quote": "Can the queue show critical first?",
           "who": "SOC analyst, Northwind Health",
           "date": "2026-09-04"
+        },
+        {
+          "source": "slack:#support:2026-08-17",
+          "quote": "Acme asked whether we can sort the queue by severity.",
+          "who": "Noa Katz (Support Lead), relaying Acme",
+          "date": "2026-08-22"
         }
       ],
       "accounts": [
-        "Northwind Health"
+        "Northwind Health",
+        "Acme Logistics"
       ],
-      "strength": "repeated",
-      "first_seen": "2026-09-04",
+      "strength": "widespread",
+      "first_seen": "2026-08-22",
       "last_seen": "2026-09-18"
     },
     {
@@ -107,7 +165,7 @@
       "id": "K-004",
       "type": "behaviour",
       "title": "Analysts scan the queue by time and overlook severity",
-      "statement": "In usability testing, 4 of 5 analysts scanned the queue top to bottom by time (median 74 seconds to find the critical alert) and 3 of 5 did not look at the Severity column until prompted.",
+      "statement": "In usability testing, 4 of 5 analysts scanned the queue top to bottom by time (median 74 seconds to find the critical alert) and 3 of 5 did not look at the Severity column until prompted. In a separate session an analyst scrolled about 46 rows before finding the first critical.",
       "screens": [
         "/alerts"
       ],
@@ -123,10 +181,16 @@
           "quote": "3 of 5 did not look at the Severity column at all until prompted.",
           "who": "3 of 5 analysts (usability test participants)",
           "date": "2026-09-24"
+        },
+        {
+          "source": "slack:#support:2026-09-21",
+          "quote": "analyst scrolled ~46 rows before finding the first critical",
+          "who": "Noa Katz (Support Lead), relaying Lior's usability session notes",
+          "date": "2026-09-24"
         }
       ],
       "accounts": [],
-      "strength": "single",
+      "strength": "repeated",
       "first_seen": "2026-09-24",
       "last_seen": "2026-09-24"
     },
@@ -134,7 +198,7 @@
       "id": "K-005",
       "type": "pain",
       "title": "Severity column is visually indistinguishable",
-      "statement": "The Severity column reads as uniform grey text, so analysts don't notice it.",
+      "statement": "Severity in the alert queue is plain text in the same grey as everything else, so analysts don't notice it; a customer SOC lead called the queue 'a wall of grey'.",
       "screens": [
         "/alerts"
       ],
@@ -144,11 +208,26 @@
           "quote": "Oh, there's a severity column? It's all the same grey text.",
           "who": "P3, analyst (usability test participant)",
           "date": "2026-09-24"
+        },
+        {
+          "source": "slack:#design:2026-08-17",
+          "quote": "Looking at the alert queue: severity is plain text in the same grey as everything else.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-20"
+        },
+        {
+          "source": "slack:#support:2026-08-17",
+          "quote": "Their SOC lead literally said the queue is 'a wall of grey'.",
+          "who": "Lior Ben-David (Customer Success), relaying Helix SOC lead",
+          "date": "2026-08-19"
         }
       ],
-      "accounts": [],
-      "strength": "single",
-      "first_seen": "2026-09-24",
+      "accounts": [
+        "internal",
+        "Helix"
+      ],
+      "strength": "widespread",
+      "first_seen": "2026-08-19",
       "last_seen": "2026-09-24"
     },
     {
@@ -545,7 +624,7 @@
       "id": "K-020",
       "type": "pain",
       "title": "Disabled Isolate button doesn't explain why",
-      "statement": "Analysts see the Isolate button greyed out without understanding why; 4 of 5 hovered it but only 1 noticed the tooltip, and it can be read as broken.",
+      "statement": "Analysts see the Isolate host button greyed out without understanding why; the explanation sits in a tooltip that almost nobody notices (4 of 5 hovered, only 1 saw it), it can be read as broken, and it keeps generating support tickets (4 in one week, 3 in another).",
       "screens": [
         "/incident"
       ],
@@ -567,14 +646,33 @@
           "quote": "The isolate button is greyed out for me.",
           "who": "Analyst, Brightline Bank",
           "date": "2026-09-22"
+        },
+        {
+          "source": "slack:#support:2026-09-07",
+          "quote": "Analysts keep asking why 'Isolate host' is greyed out. The tooltip explains it but nobody hovers.",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-09-08"
+        },
+        {
+          "source": "slack:#support:2026-09-07",
+          "quote": "4 tickets this week.",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-09-08"
+        },
+        {
+          "source": "slack:#support:2026-10-12",
+          "quote": "Isolate-button confusion 3",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-13"
         }
       ],
       "accounts": [
-        "Brightline Bank"
+        "Brightline Bank",
+        "internal"
       ],
-      "strength": "repeated",
-      "first_seen": "2026-09-22",
-      "last_seen": "2026-09-24"
+      "strength": "widespread",
+      "first_seen": "2026-09-08",
+      "last_seen": "2026-10-13"
     },
     {
       "id": "K-021",
@@ -674,6 +772,885 @@
       "strength": "single",
       "first_seen": "2026-10-08",
       "last_seen": "2026-10-08"
+    },
+    {
+      "id": "K-025",
+      "type": "fact",
+      "title": "Severity colour tokens exist but are unused",
+      "statement": "tokens.css already defines --color-sev-* tokens, but no component uses them.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-08-17",
+          "quote": "We have --color-sev-* tokens in tokens.css that nobody uses.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-20"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-20",
+      "last_seen": "2026-08-20"
+    },
+    {
+      "id": "K-026",
+      "type": "request",
+      "title": "Show severity as a coloured badge plus the word, never colour alone",
+      "statement": "Designer proposed that severity always appears as a coloured badge with the severity word, so colour-blind analysts are not relying on colour alone.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-08-17",
+          "quote": "Proposal: severity always shows as a coloured badge + the word. Never colour alone (colour-blind analysts).",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-20"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-20",
+      "last_seen": "2026-08-20"
+    },
+    {
+      "id": "K-027",
+      "type": "decision",
+      "title": "Severity always shown with sev colour token and the word, on every screen",
+      "statement": "Head of Product decided on 2026-08-26 that severity is always shown with the sev colour token and the word in the queue, overview and incident screens. Engineering put it on the Q3 list as a small change; the designer will document it in design-system.md. Not recorded in the product decision log.",
+      "screens": [
+        "/alerts",
+        "/overview",
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-24",
+          "quote": "severity is always shown with the sev colour token AND the word, everywhere (queue, overview, incident).",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-08-26"
+        },
+        {
+          "source": "slack:#product:2026-08-24",
+          "quote": "Yes, I'll put it on the Q3 list. Small change.",
+          "who": "Tom Brenner (Engineering Lead)",
+          "date": "2026-08-26"
+        },
+        {
+          "source": "slack:#product:2026-08-24",
+          "quote": "I'll write it into design-system.md too.",
+          "who": "Eli Shapiro (Designer (part-time))",
+          "date": "2026-08-26"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-26",
+      "last_seen": "2026-08-26"
+    },
+    {
+      "id": "K-028",
+      "type": "decision",
+      "title": "Severity is a variant of the existing Badge component",
+      "statement": "Badge.tsx has only one neutral style; the team agreed to add a severity variant rather than a new component, and a spec was drafted with critical/high/medium/low variants using --color-sev-* plus text.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-08-17",
+          "quote": "Badge.tsx only has one neutral style right now, so this needs a severity variant.",
+          "who": "Yael Stern, Frontend Engineer",
+          "date": "2026-08-20"
+        },
+        {
+          "source": "slack:#design:2026-08-17",
+          "quote": "Yes, a variant, not a new component.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-20"
+        },
+        {
+          "source": "slack:#design:2026-09-21",
+          "quote": "Badge with severity variant: drafted the spec. Variants: critical/high/medium/low using --color-sev-*, plus text.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-09-22"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-08-20",
+      "last_seen": "2026-09-22"
+    },
+    {
+      "id": "K-029",
+      "type": "decision",
+      "title": "Critical rows on crown-jewel assets get a critical background",
+      "statement": "The severity spec says critical rows on crown-jewel assets get the --color-sev-critical-bg row background.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-09-21",
+          "quote": "Critical rows on crown-jewel assets get --color-sev-critical-bg.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-09-22"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-22",
+      "last_seen": "2026-09-22"
+    },
+    {
+      "id": "K-030",
+      "type": "fact",
+      "title": "Severity badge decision keeps slipping and is still not in the product",
+      "statement": "The 2026-08-26 severity decision slipped behind API work, sat unpicked, and six weeks later the queue still showed grey text. Ownership moved from Tom to Yael on 2026-10-06 for that sprint.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-31",
+          "quote": "Severity badges (decided 26/8) still not done.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-04"
+        },
+        {
+          "source": "slack:#product:2026-08-31",
+          "quote": "On (2): sorry, slipped behind the API work. Still planned.",
+          "who": "Tom Brenner, Engineering Lead",
+          "date": "2026-09-04"
+        },
+        {
+          "source": "slack:#design:2026-09-21",
+          "quote": "Nobody has picked it up yet.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-09-22"
+        },
+        {
+          "source": "slack:#design:2026-10-05",
+          "quote": "Reminder that the severity decision from 26/8 is still not in the product. Queue still shows grey text severity. It's been 6 weeks.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-10-06"
+        },
+        {
+          "source": "slack:#design:2026-10-05",
+          "quote": "It's on me now, Tom moved it. This sprint.",
+          "who": "Yael Stern, Frontend Engineer",
+          "date": "2026-10-06"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-04",
+      "last_seen": "2026-10-06"
+    },
+    {
+      "id": "K-031",
+      "type": "pain",
+      "title": "PageHeader subtitle has failing contrast on every screen",
+      "statement": "The PageHeader subtitle uses hardcoded #b8bcc4, about 1.9:1 on the light background, failing WCAG AA; it appears on every screen.",
+      "screens": [],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-08-24",
+          "quote": "PageHeader subtitle uses a hardcoded #b8bcc4. That's ~1.9:1 on our light background, fails AA badly.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-27"
+        },
+        {
+          "source": "slack:#design:2026-08-24",
+          "quote": "It's on every screen. I'd call it urgent-ish.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-27"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-27",
+      "last_seen": "2026-08-27"
+    },
+    {
+      "id": "K-032",
+      "type": "request",
+      "title": "Use --color-text-muted for the PageHeader subtitle",
+      "statement": "Designer asks for the subtitle to use the --color-text-muted token; engineering will fix it opportunistically and questions the urgency, so priority is unsettled.",
+      "screens": [],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-08-24",
+          "quote": "Should be --color-text-muted.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-08-27"
+        },
+        {
+          "source": "slack:#design:2026-08-24",
+          "quote": "Will fix when I'm in there. Not urgent?",
+          "who": "Yael Stern, Frontend Engineer",
+          "date": "2026-08-27"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-27",
+      "last_seen": "2026-08-27"
+    },
+    {
+      "id": "K-033",
+      "type": "request",
+      "title": "Dark theme for SOCs working in dark rooms",
+      "statement": "Two unnamed customers who run their SOC in dark rooms asked for a dark theme (relayed by engineering).",
+      "screens": [],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-09-07",
+          "quote": "Two customers run their SOC in dark rooms and asked.",
+          "who": "Yael Stern, Frontend Engineer",
+          "date": "2026-09-10"
+        },
+        {
+          "source": "slack:#design:2026-09-07",
+          "quote": "Two customers run their SOC in dark rooms",
+          "who": "Yael Stern, Frontend Engineer",
+          "date": "2026-09-10"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-10",
+      "last_seen": "2026-09-10"
+    },
+    {
+      "id": "K-034",
+      "type": "decision",
+      "title": "Hardcoded hex cleanup is a prerequisite",
+      "statement": "PageHeader and a few other components hardcode hex colours instead of tokens.css, which would break a dark theme; the team agreed moving them to tokens is a prerequisite either way.",
+      "screens": [],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-09-07",
+          "quote": "Right now PageHeader and a few others hardcode hex, which would break dark mode.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-09-10"
+        },
+        {
+          "source": "slack:#design:2026-09-07",
+          "quote": "OK so the hex cleanup is a prerequisite either way.",
+          "who": "Yael Stern, Frontend Engineer",
+          "date": "2026-09-10"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-10",
+      "last_seen": "2026-09-10"
+    },
+    {
+      "id": "K-035",
+      "type": "decision",
+      "title": "All text colours go through three tokens (default, muted, inverse)",
+      "statement": "Head of Product agreed that all text colours use three tokens (default, muted, inverse), provided it doesn't delay the queue work. --color-text-muted is #5b6270 and has no dark-mode pair yet.",
+      "screens": [],
+      "evidence": [
+        {
+          "source": "slack:#design:2026-10-05",
+          "quote": "--color-text-muted is #5b6270. For dark mode later we'd need a pair.",
+          "who": "Eli Shapiro, Designer (part-time)",
+          "date": "2026-10-08"
+        },
+        {
+          "source": "slack:#design:2026-10-05",
+          "quote": "Agreed, as long as it doesn't delay the queue work.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-10-08"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-08",
+      "last_seen": "2026-10-08"
+    },
+    {
+      "id": "K-036",
+      "type": "decision",
+      "title": "Q3 goal: triage critical crown-jewel alerts in under 5 minutes",
+      "statement": "The Q3 product goal is mean time to triage critical alerts on crown-jewel assets under 5 minutes; everything picked this quarter should move that number. The Northwind DC-01 incident was called out as exactly this metric.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-17",
+          "quote": "Q3 goal reminder: mean time to triage critical alerts on crown-jewel assets under 5 min. Today we're around 20. Everything we pick this quarter should move that number.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-08-18"
+        },
+        {
+          "source": "slack:#support:2026-08-31",
+          "quote": "This is exactly the Q3 metric. Let's talk Thursday.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-09-02"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-08-18",
+      "last_seen": "2026-09-02"
+    },
+    {
+      "id": "K-037",
+      "type": "fact",
+      "title": "Triage time stayed around 20 minutes through Q3",
+      "statement": "Mean time to triage critical alerts was around 20 minutes in August and still about 21 minutes at the Q3 retro; the queue changes did not ship in Q3.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-17",
+          "quote": "Today we're around 20.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-08-18"
+        },
+        {
+          "source": "slack:#product:2026-10-12",
+          "quote": "Q3 retro: MTTT for criticals still ~21 min.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-10-15"
+        },
+        {
+          "source": "slack:#product:2026-10-12",
+          "quote": "We didn't ship the queue changes.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-10-15"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-08-18",
+      "last_seen": "2026-10-15"
+    },
+    {
+      "id": "K-038",
+      "type": "fact",
+      "title": "The alert queue is ordered by time only",
+      "statement": "The queue is sorted newest-first only, so a burst of low-severity alerts pushes everything else down.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#support:2026-08-17",
+          "quote": "Told them it's newest-first for now.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-08-22"
+        },
+        {
+          "source": "slack:#support:2026-08-31",
+          "quote": "The queue sorts only by time, so a burst of low-severity noise pushes everything down.",
+          "who": "Tom Brenner (Engineering Lead)",
+          "date": "2026-09-02"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-08-22",
+      "last_seen": "2026-09-02"
+    },
+    {
+      "id": "K-039",
+      "type": "fact",
+      "title": "Alert noise is a recurring support ticket category across accounts",
+      "statement": "Support tags queue complaints as alert-noise. Northwind raised it three times in August (NW-2291), and one October week had 7 alert-noise tickets: Northwind 3, Acme 2, Helix 2.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#support:2026-08-17",
+          "quote": "Third time this month from them. Ticket NW-2291.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-08-19"
+        },
+        {
+          "source": "slack:#support:2026-08-17",
+          "quote": "Tagging as alert-noise.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-08-19"
+        },
+        {
+          "source": "slack:#support:2026-10-12",
+          "quote": "alert-noise tickets 7 (Northwind 3, Acme 2, Helix 2)",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-13"
+        },
+        {
+          "source": "slack:#support:2026-10-12",
+          "quote": "Northwind 3",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-13"
+        },
+        {
+          "source": "slack:#support:2026-10-12",
+          "quote": "Acme 2",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-13"
+        },
+        {
+          "source": "slack:#support:2026-10-12",
+          "quote": "Helix 2",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-13"
+        }
+      ],
+      "accounts": [
+        "Northwind Health",
+        "Acme Logistics",
+        "Helix",
+        "internal"
+      ],
+      "strength": "widespread",
+      "first_seen": "2026-08-19",
+      "last_seen": "2026-10-13"
+    },
+    {
+      "id": "K-040",
+      "type": "fact",
+      "title": "Acme's expansion depends on fixing queue noise",
+      "statement": "Acme's SOC manager says they hate the queue, and Acme's pilot expansion to 3 more teams is blocked until the queue noise is fixed.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "Acme pilot expansion is blocked on the queue. Their words: 'fix the noise and we sign for 3 more teams'.",
+          "who": "Ben Cooper, Sales",
+          "date": "2026-09-29"
+        },
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "fix the noise and we sign for 3 more teams",
+          "who": "Acme (relayed by Ben Cooper, Sales)",
+          "date": "2026-09-29"
+        },
+        {
+          "source": "slack:#support:2026-09-07",
+          "quote": "we hate the queue",
+          "who": "SOC manager, Acme (via Lior Ben-David, Customer Success)",
+          "date": "2026-09-12"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-12",
+      "last_seen": "2026-09-29"
+    },
+    {
+      "id": "K-041",
+      "type": "fact",
+      "title": "Acme likes the incident view",
+      "statement": "Acme's SOC manager says they love the incident view.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#support:2026-09-07",
+          "quote": "we love the incident view",
+          "who": "SOC manager, Acme (via Lior Ben-David, Customer Success)",
+          "date": "2026-09-12"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-12",
+      "last_seen": "2026-09-12"
+    },
+    {
+      "id": "K-042",
+      "type": "decision",
+      "title": "Queue noise is October's top priority, shipping with severity badges",
+      "statement": "Fixing queue noise became the top priority for October; after missing Q3, the queue changes and severity badges are to ship together in October.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "Noted. This is now the top priority for October.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-29"
+        },
+        {
+          "source": "slack:#product:2026-10-12",
+          "quote": "October is the month.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-10-15"
+        },
+        {
+          "source": "slack:#product:2026-10-12",
+          "quote": "Agreed. Queue + severity badges together.",
+          "who": "Tom Brenner (Engineering Lead)",
+          "date": "2026-10-15"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-09-29",
+      "last_seen": "2026-10-15"
+    },
+    {
+      "id": "K-043",
+      "type": "decision",
+      "title": "Queue ordering: leaning to sort by severity and asset criticality first",
+      "statement": "Two options are on the table: sort by severity plus asset criticality, or collapse duplicates by fingerprint. Head of Product leans to sorting first; not final.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-31",
+          "quote": "Queue ordering: options are sort by severity+asset criticality, or collapse duplicates by fingerprint. Leaning to sorting first.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-04"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-04",
+      "last_seen": "2026-09-04"
+    },
+    {
+      "id": "K-044",
+      "type": "fact",
+      "title": "Both queue options are frontend-only",
+      "statement": "The API already returns asset, assetCriticality and fingerprint for every alert, so sorting and duplicate collapsing can be built in the frontend only, making them cheaper.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-09-14",
+          "quote": "FYI the API already returns asset, assetCriticality and fingerprint for every alert. So both queue options are frontend-only.",
+          "who": "Tom Brenner (Engineering Lead)",
+          "date": "2026-09-17"
+        },
+        {
+          "source": "slack:#product:2026-09-14",
+          "quote": "Great, that makes it cheaper.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-09-17"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-17",
+      "last_seen": "2026-09-17"
+    },
+    {
+      "id": "K-045",
+      "type": "decision",
+      "title": "Hide duplicate alerts by default for Acme (Slack decision, not in decision log)",
+      "statement": "Head of Product decided to hide duplicates by default in the queue, showing only the latest per fingerprint with a toggle to show all, for Acme, judging the toggle enough to keep everything visible.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "let's hide duplicate alerts by default in the queue (show only the latest of each fingerprint), with a toggle to show all. They want the noise gone.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-10-01"
+        },
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "It's a toggle, they can still see everything. Let's do it for Acme.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-10-01"
+        }
+      ],
+      "accounts": [
+        "Acme Logistics",
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-01",
+      "last_seen": "2026-10-01"
+    },
+    {
+      "id": "K-046",
+      "type": "fact",
+      "title": "Northwind's auditors check that nothing is hidden by default",
+      "statement": "Support warns that Northwind's auditors specifically check that no alert is hidden by default.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "Careful, Northwind's auditors specifically check that nothing is hidden by default.",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-01"
+        }
+      ],
+      "accounts": [
+        "Northwind Health"
+      ],
+      "strength": "single",
+      "first_seen": "2026-10-01",
+      "last_seen": "2026-10-01"
+    },
+    {
+      "id": "K-047",
+      "type": "request",
+      "title": "Don't hide duplicates by default until D-07 is settled",
+      "statement": "Engineering and design flagged that hiding duplicates by default may clash with D-07 and asked not to ship it until that question is settled.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-09-28",
+          "quote": "Doesn't that clash with the 'every raw alert stays visible' rule?",
+          "who": "Tom Brenner, Engineering Lead",
+          "date": "2026-10-01"
+        },
+        {
+          "source": "slack:#product:2026-10-12",
+          "quote": "And please don't hide duplicates by default until we've settled the D-07 question.",
+          "who": "Eli Shapiro (Designer, part-time)",
+          "date": "2026-10-15"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "repeated",
+      "first_seen": "2026-10-01",
+      "last_seen": "2026-10-15"
+    },
+    {
+      "id": "K-048",
+      "type": "request",
+      "title": "Reports tab with weekly stats in main navigation",
+      "statement": "A fintech prospect with 40 analysts asked for a 'Reports' tab in the main nav with weekly stats; sales sees it as a possible deal-maker and will position it as part of Overview.",
+      "screens": [
+        "/overview"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-24",
+          "quote": "Prospect (Fintech, 40 analysts) asked for a 'Reports' tab in the main nav with weekly stats. Could be a deal-maker.",
+          "who": "Ben Cooper (Sales), relaying a Fintech prospect",
+          "date": "2026-08-29"
+        },
+        {
+          "source": "slack:#product:2026-08-24",
+          "quote": "Understood, I'll position it as Overview.",
+          "who": "Ben Cooper (Sales)",
+          "date": "2026-08-29"
+        }
+      ],
+      "accounts": [
+        "Fintech prospect (40 analysts)"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-29",
+      "last_seen": "2026-08-29"
+    },
+    {
+      "id": "K-049",
+      "type": "decision",
+      "title": "No new top-level nav; weekly stats go into Overview",
+      "statement": "Head of Product cited D-15 as 'no new top-level nav this year' and said weekly stats, if built, go into Overview.",
+      "screens": [
+        "/overview"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-24",
+          "quote": "D-15: no new top-level nav this year. If we do weekly stats it goes into Overview.",
+          "who": "Maya Levi (Head of Product)",
+          "date": "2026-08-29"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-08-29",
+      "last_seen": "2026-08-29"
+    },
+    {
+      "id": "K-050",
+      "type": "request",
+      "title": "PDF export of incident timelines for auditors",
+      "statement": "Several accounts want to export an incident timeline as PDF, mainly for audits (Helix, Acme for SOC2, Northwind). Counts in Slack go from 3 customers to 4 accounts; it is on the request list.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#support:2026-08-24",
+          "quote": "is there a way to export an incident timeline as PDF for our auditors?",
+          "who": "Noa Katz (Support Lead), relaying Helix",
+          "date": "2026-08-25"
+        },
+        {
+          "source": "slack:#support:2026-08-24",
+          "quote": "Acme asked for the same thing last month, for their SOC2 audit.",
+          "who": "Lior Ben-David (Customer Success), relaying Acme",
+          "date": "2026-08-25"
+        },
+        {
+          "source": "slack:#product:2026-08-31",
+          "quote": "PDF timeline export: 3 customers now",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-04"
+        },
+        {
+          "source": "slack:#support:2026-09-14",
+          "quote": "Another PDF export request (Northwind) for incident timelines. That's 4 accounts.",
+          "who": "Noa Katz (Support Lead)",
+          "date": "2026-09-15"
+        },
+        {
+          "source": "slack:#support:2026-09-14",
+          "quote": "Adding to the request list.",
+          "who": "Lior Ben-David (Customer Success)",
+          "date": "2026-09-15"
+        },
+        {
+          "source": "slack:#support:2026-10-12",
+          "quote": "PDF export 1",
+          "who": "Noa Katz, Support Lead",
+          "date": "2026-10-13"
+        }
+      ],
+      "accounts": [
+        "Helix",
+        "Acme Logistics",
+        "Northwind Health"
+      ],
+      "strength": "widespread",
+      "first_seen": "2026-08-25",
+      "last_seen": "2026-10-13"
+    },
+    {
+      "id": "K-051",
+      "type": "decision",
+      "title": "PDF timeline export parked until Q4",
+      "statement": "Head of Product parked PDF timeline export until Q4.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#product:2026-08-31",
+          "quote": "parking until Q4.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-04"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-04",
+      "last_seen": "2026-09-04"
+    },
+    {
+      "id": "K-052",
+      "type": "decision",
+      "title": "D-12 stays; make the containment restriction visible, not a tooltip",
+      "statement": "On 2026-09-08 Head of Product confirmed only incident leads isolate (D-12) and suggested showing the explanation visibly instead of in a tooltip.",
+      "screens": [
+        "/incident"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#support:2026-09-07",
+          "quote": "That's D-12, only incident leads isolate. The rule stays.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-08"
+        },
+        {
+          "source": "slack:#support:2026-09-07",
+          "quote": "But the explanation could be visible, not a tooltip.",
+          "who": "Maya Levi, Head of Product",
+          "date": "2026-09-08"
+        }
+      ],
+      "accounts": [
+        "internal"
+      ],
+      "strength": "single",
+      "first_seen": "2026-09-08",
+      "last_seen": "2026-09-08"
+    },
+    {
+      "id": "K-053",
+      "type": "behaviour",
+      "title": "Analysts open every alert instead of reading the list",
+      "statement": "An analyst in a usability session opened every alert because the list was slower to read than opening items.",
+      "screens": [
+        "/alerts"
+      ],
+      "evidence": [
+        {
+          "source": "slack:#support:2026-09-21",
+          "quote": "I just open everything, it's faster than reading",
+          "who": "Analyst in usability session (via Noa Katz, Support Lead)",
+          "date": "2026-09-24"
+        }
+      ],
+      "accounts": [],
+      "strength": "single",
+      "first_seen": "2026-09-24",
+      "last_seen": "2026-09-24"
     }
   ],
   "conflicts": [
@@ -683,6 +1660,22 @@
       "entry": "K-024",
       "summary": "D-12 (active) says only incident leads may run containment and forbids enabling the button for analysts or bypassing the API check. On 2026-10-08 the PM decided in Slack that analysts can isolate test-tagged assets, but D-12 has not been updated and has no test-asset exception.",
       "question": "Is D-12 being amended to let analysts isolate test-tagged assets? If so, who approves the change, how is 'test' tagging verified so a mis-tagged production host can't be isolated, and will the decision log be updated before any work starts?",
+      "status": "open"
+    },
+    {
+      "id": "C-002",
+      "decision": "D-07",
+      "entry": "K-045",
+      "summary": "D-07 (active) requires analysts to see every ingested alert and forbids dropping or permanently hiding alerts. On 2026-10-01 Head of Product decided in Slack to hide duplicates by default for Acme (latest per fingerprint, toggle to show all). Engineering flagged a clash, Support noted Northwind's auditors check that nothing is hidden by default (K-046), and design asked not to ship it until D-07 is settled (K-047). The decision log has not been updated.",
+      "question": "Does hiding duplicates by default behind a toggle comply with D-07 and the SOC 2 requirement? If yes, should D-07 be amended to say so, and is it Acme-only or global given Northwind's audit check? If no, would grouping duplicates into one visible row with a count (K-008) meet Acme's need instead?",
+      "status": "open"
+    },
+    {
+      "id": "C-003",
+      "decision": "D-15",
+      "entry": "K-049",
+      "summary": "D-15 (active) says no new navigation items 'this quarter' while navigation research runs. On 2026-08-29 Head of Product quoted D-15 as 'no new top-level nav this year'. The scope in Slack is longer than the written decision.",
+      "question": "Does D-15 run to the end of the quarter or the end of the year? If it was extended, can the decision log be updated with the new end date?",
       "status": "open"
     }
   ]
