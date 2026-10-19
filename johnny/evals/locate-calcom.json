@@ -1,0 +1,85 @@
+{
+  "repo": "cal.com",
+  "app": "apps/web/app",
+  "note": "Real UI fixes from cal.com's git history. Each report is the commit's problem rewritten as a user would say it, with no file or component names. Truth is the UI files the fix changed. The fixes are already in the code, so Johnny locates where the problem lived, not a live bug.",
+  "cases": [
+    {
+      "commit": "44ccc72f",
+      "report": "During onboarding on my phone, the Continue button sits on top of the Bio box so I can't see what I'm typing.",
+      "truth": [
+        "apps/web/modules/onboarding/components/OnboardingCard.tsx",
+        "apps/web/modules/onboarding/components/OnboardingLayout.tsx"
+      ]
+    },
+    {
+      "commit": "a69c1761",
+      "report": "When I edit an event's link, the cal.com/username part in front of the box sits a bit higher than the text I type. Looks off.",
+      "truth": [
+        "apps/web/modules/event-types/components/tabs/setup/EventSetupTab.tsx"
+      ]
+    },
+    {
+      "commit": "e9c6d0ee",
+      "report": "In the App Store, the little left/right arrows for scrolling the categories aren't centred vertically.",
+      "truth": [
+        "apps/web/modules/apps/components/AllApps.tsx"
+      ]
+    },
+    {
+      "commit": "1591a50b",
+      "report": "Searching the app store for 'google meet' finds nothing unless I type it exactly like 'Google Meet'. Extra spaces break it too.",
+      "truth": [
+        "apps/web/modules/apps/components/AllApps.tsx"
+      ]
+    },
+    {
+      "commit": "cdeaca4d",
+      "report": "On the login page the 'Sign in with Google' button looks squashed, there's barely any space above and below the text.",
+      "truth": [
+        "apps/web/modules/auth/login-view.tsx"
+      ]
+    },
+    {
+      "commit": "a694202c",
+      "report": "I signed up with a typo in my email and now I'm stuck on the 'check your email' page. There's no way to change the address.",
+      "truth": [
+        "apps/web/modules/auth/verify-email-view.tsx"
+      ]
+    },
+    {
+      "commit": "a3baf493",
+      "report": "When I pick a date to book, hovering over the available days doesn't show a hand cursor, so it's not obvious they're clickable.",
+      "truth": [
+        "packages/features/calendars/components/DatePicker.tsx"
+      ]
+    },
+    {
+      "commit": "b46c04da",
+      "report": "If I give a booking question a label that's just spaces, the question shows up with no label at all in the list of questions.",
+      "truth": [
+        "apps/web/modules/event-types/components/tabs/advanced/FormBuilder.tsx"
+      ]
+    },
+    {
+      "commit": "635c1feb",
+      "report": "When I open a booking's details panel, the text at the bottom of the panel overlaps.",
+      "truth": [
+        "apps/web/modules/bookings/components/BookingDetailsSheet.tsx"
+      ]
+    },
+    {
+      "commit": "ab4eff1f",
+      "report": "My booking page is in German but on the payment page the duration still says 'mins' in English.",
+      "truth": [
+        "apps/web/app/(use-page-wrapper)/payment/[uid]/PaymentPage.tsx"
+      ]
+    },
+    {
+      "commit": "d1ad4ea8",
+      "report": "I set an event to require a cancellation reason, saved, and when I come back the setting has reset.",
+      "truth": [
+        "apps/web/modules/event-types/components/tabs/advanced/EventAdvancedTab.tsx"
+      ]
+    }
+  ]
+}
