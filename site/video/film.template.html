@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Johnny film</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap">
+<style>
+/* A 1920x1080 film driven by render(t): every frame is a pure function of time, so it records the same way every time. */
+:root {
+  --bg: #eef0f3; --surface: #ffffff; --ink: #15171c; --muted: #5a6070; --line: #dde1e7;
+  --mark: #f59e0b; --mark-ink: #1a1306; --ok: #12805c; --accent: #2f5bea;
+  --display: "Bricolage Grotesque", "Inter", sans-serif; --ui: "Inter", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); font-family: var(--ui); color: var(--ink); -webkit-font-smoothing: antialiased; }
+.layer { position: absolute; inset: 0; }
+
+/* Title and end cards */
+.card { display: flex; flex-direction: column; justify-content: center; padding-left: 180px; }
+.card h1 { font: 800 112px/1.02 var(--display); letter-spacing: -0.035em; margin: 0; max-width: 1500px; }
+.card h1 .hl { background: linear-gradient(transparent 62%, var(--mark) 62%, var(--mark) 92%, transparent 92%); }
+.card p { font-size: 34px; color: var(--muted); margin: 34px 0 0; }
+.brand { position: absolute; left: 180px; top: 120px; display: flex; align-items: center; gap: 16px; font: 800 40px/1 var(--display); letter-spacing: -0.02em; }
+.brand i { width: 44px; height: 44px; border-radius: 11px; background: var(--mark); position: relative; display: inline-block; }
+.brand i::after { content: ""; position: absolute; inset: 10px; border: 3px solid var(--mark-ink); border-radius: 5px; }
+.fine { position: absolute; left: 180px; bottom: 90px; font-size: 22px; color: var(--muted); }
+
+/* Main scene: chat on the left, the product on the right */
+.chapter { position: absolute; left: 80px; top: 54px; font: 700 30px/1 var(--display); letter-spacing: -0.01em; display: flex; align-items: center; gap: 14px; }
+.chapter b { background: var(--ink); color: var(--bg); font: 600 18px/1 var(--ui); padding: 8px 12px; border-radius: 8px; }
+.chat { position: absolute; left: 80px; top: 120px; width: 760px; height: 900px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 60px -30px rgba(20, 24, 40, .35); overflow: hidden; display: flex; flex-direction: column; }
+.chat header { padding: 22px 28px; border-bottom: 1px solid var(--line); font-weight: 700; font-size: 24px; display: flex; justify-content: space-between; }
+.chat header span { color: var(--muted); font-weight: 500; font-size: 18px; }
+.viewport { position: relative; flex: 1; overflow: hidden; }
+.feed { position: absolute; left: 0; right: 0; top: 0; padding: 10px 0 24px; will-change: transform; }
+.msg { display: grid; grid-template-columns: 52px 1fr; gap: 16px; padding: 14px 28px; }
+.av { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; font: 800 24px/1 var(--display); }
+.av.j { background: var(--mark); color: var(--mark-ink); }
+.av.m { background: #dfe3ea; color: var(--ink); }
+.who { font-weight: 700; font-size: 21px; }
+.who time { font-weight: 400; color: var(--muted); font-size: 16px; margin-left: 10px; }
+.text { font-size: 21px; line-height: 1.5; margin-top: 2px; }
+.text .sec { font-weight: 700; margin-top: 10px; }
+.text ul { margin: 4px 0 0; padding-left: 24px; }
+.text li { margin: 4px 0; }
+.text q { font-style: italic; }
+.text code { font: 18px ui-monospace, Menlo, monospace; background: var(--bg); padding: 1px 6px; border-radius: 5px; }
+.system { padding: 10px 28px 4px 96px; color: var(--muted); font-size: 18px; }
+.typing { display: inline-flex; gap: 6px; padding: 10px 0; }
+.typing i { width: 10px; height: 10px; border-radius: 50%; background: #b9bfca; display: inline-block; }
+.steps { margin-top: 6px; font-size: 19px; }
+.steps div { display: flex; align-items: center; gap: 10px; padding: 3px 0; }
+.steps .ok { color: var(--ok); font-weight: 700; }
+.result { margin-top: 10px; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; font-size: 19px; }
+.result .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; }
+.result .row span { color: var(--ok); font-weight: 600; white-space: nowrap; }
+.buttons { display: flex; gap: 10px; margin-top: 12px; }
+.buttons span { border: 1px solid var(--line); border-radius: 10px; padding: 9px 16px; font-weight: 600; font-size: 18px; }
+.buttons .primary { background: #15803d; color: #fff; border-color: #15803d; }
+.done { color: var(--ok); }
+
+.stage { position: absolute; left: 900px; top: 120px; width: 940px; height: 900px; }
+.shot { position: absolute; left: 0; width: 940px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 30px 60px -30px rgba(20, 24, 40, .35); background: var(--surface); }
+.shot img { display: block; width: 100%; }
+.shot .tag { position: absolute; right: 16px; bottom: 16px; background: var(--ink); color: var(--bg); font-weight: 700; font-size: 18px; padding: 7px 12px; border-radius: 8px; }
+.note { position: absolute; border: 4px solid var(--mark); border-radius: 10px; }
+.note span { position: absolute; left: -4px; top: -42px; background: var(--mark); color: var(--mark-ink); font-weight: 700; font-size: 18px; padding: 6px 10px; border-radius: 8px; white-space: nowrap; }
+.cursor { position: absolute; width: 30px; height: 30px; }
+</style>
+</head>
+<body>
+<div class="layer card" id="title">
+  <div class="brand"><i></i>Johnny</div>
+  <h1>Johnny is <span class="hl" id="titleLine">your new product designer.</span></h1>
+  <p id="titleSub">He joins your Slack and learns your product.</p>
+</div>
+
+<div class="layer" id="scene">
+  <div class="chapter" id="chapter"><b id="chapNum">1</b><span id="chapText"></span></div>
+  <div class="chat">
+    <header>#sentinel-team <span id="clock">10:40</span></header>
+    <div class="viewport"><div class="feed" id="feed"></div></div>
+  </div>
+  <div class="stage" id="stage">
+    <div class="shot" id="shotBefore" style="top:0"><img src="{{BEFORE}}"><div class="tag">Today</div>
+      <div class="note" id="n1" style="left:712px;top:146px;width:120px;height:362px"><span>Severity is grey text</span></div>
+      <div class="note" id="n2" style="left:206px;top:91px;width:96px;height:24px"><span style="top:30px">#b8bcc4 · 1.9:1</span></div>
+    </div>
+    <div class="shot" id="shotSketch" style="top:0"><img src="{{SKETCH}}"><div class="tag">Johnny's sketch · 30 seconds</div></div>
+    <div class="shot" id="shotA" style="top:0"><img src="{{OPTION_A}}"><div class="tag">Option A · built</div></div>
+    <div class="shot" id="shotB" style="top:0"><img src="{{OPTION_B}}"><div class="tag">Option B · built</div></div>
+  </div>
+  <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l15 11-6.5 1.2L16 21l-3 1.3-3.4-6.9L4 20z" fill="#15171c" stroke="#fff" stroke-width="1.5"/></svg>
+</div>
+
+<div class="layer card" id="end">
+  <div class="brand"><i></i>Johnny</div>
+  <h1>Add Johnny to Slack.<br><span class="hl">He's on it.</span></h1>
+  <p>An AI product designer. He listens, remembers why, sketches and builds. People decide what ships.</p>
+  <div class="fine">Sentinel is a demo product. The Slack history is sample data; Johnny's messages, sketch and builds are real outputs.</div>
+</div>
+
+<script>
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = (x) => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const fade = (t, a, d = .5) => ease((t - a) / d);
+
+// The conversation. t = when the message lands; typing shows for 0.9s before it.
+const J = { who: "Johnny", av: "J", cls: "j" }, M = { who: "Maya", av: "M", cls: "m" };
+const feed = [
+  { t: 5.0, sys: "Maya added <b>@Johnny</b> to #sentinel-team" },
+  { t: 6.6, ...J, time: "10:40", html: "Hi all, I'm Johnny, your new product designer. I'm reading the last 90 days here so I know what's been said and decided. Back in a few minutes." },
+  { t: 12.5, ...J, time: "10:43", blocks: [
+    "Read #design, #product and #support: 53 messages over the last 8 weeks.",
+    "<div class='sec'>What keeps coming back</div><ul><li><b>Criticals buried in /alerts</b>: Northwind, Helix and Acme, 7 alert-noise tickets in one October week. <q>we opened 40 alerts to find the 3 that mattered</q></li></ul>",
+    "<ul><li><b>Greyed-out Isolate on /incident</b>: 4 of 5 test participants missed the tooltip.</li></ul>",
+    "<div class='sec'>Decided, but not in the product</div><ul><li>Severity as colour + word (26 Aug): every level is still the same grey.</li><li>Hex cleanup (10 Sep): the page subtitle is still <code>#b8bcc4</code>, ~1.9:1.</li></ul>",
+    "<div class='sec'>Needs a decision</div><ul><li>Maya: does D-15 end this quarter (the log) or this year (Slack)?</li></ul>",
+    "Want me to sketch the queue?",
+  ], every: 1.6 },
+  { t: 25.0, ...M, time: "10:44", html: "Yes, sketch it." },
+  { t: 26.6, ...J, time: "10:44", html: "I'm on it." },
+  { t: 30.2, ...J, time: "10:45", html: "Here's the queue, danger first: severity as colour + word, like you decided on 26 Aug, and every alert still visible (D-07). One assumption to confirm: the screen doesn't show assets yet." },
+  { t: 36.4, ...M, time: "10:46", html: "Does colouring severity touch D-12?" },
+  { t: 38.4, ...J, time: "10:46", html: "No. D-12 is about who may isolate a host, not how severity looks. I'm leaving the Isolate button alone; there's an open question about test assets (C-001) to settle first." },
+  { t: 45.2, ...M, time: "10:47", html: "Great. Build it, two options." },
+  { t: 46.8, ...J, time: "10:47", html: "I'm on it. Two options, each in its own branch, back here in a few minutes.", steps: [
+    [48.6, "Option A: badges, danger-first order, asset inline"], [50.2, "Option B: severity first, its own asset column"],
+    [52.0, "Type check and build", true], [53.6, "Screenshots and live links", true], [55.2, "Checked each screenshot against what I wrote", true]] },
+  { t: 57.6, ...J, time: "10:51", result: true },
+  { t: 66.2, sys: "<span class='done'>✅ Maya approved option B. Pushed <b>johnny/option-b</b> for review.</span>" },
+];
+
+const feedEl = document.getElementById("feed");
+let built = false, nodes = [], scrollNow = 0;
+function build() {
+  feedEl.innerHTML = "";
+  nodes = feed.map((m) => {
+    const el = document.createElement("div");
+    if (m.sys) { el.className = "system"; el.innerHTML = m.sys; feedEl.append(el); return { el }; }
+    el.className = "msg";
+    el.innerHTML = `<div class="av ${m.cls}">${m.av}</div><div><div class="who">${m.who}<time>${m.time}</time></div><div class="text"></div></div>`;
+    const text = el.querySelector(".text");
+    let parts = [];
+    if (m.blocks) parts = m.blocks.map((b) => { const d = document.createElement("div"); d.innerHTML = b; text.append(d); return d; });
+    else if (m.result) {
+      text.innerHTML = `Both options are built and checked.<div class="result">
+        <div class="row">A · badges, danger-first, asset inline<span>✓ checks · 🔎 matches</span></div>
+        <div class="row">B · severity first, asset column<span>✓ checks · 🔎 matches</span></div>
+        <div class="buttons"><span>Approve A</span><span class="primary" id="approveB">Approve B</span><span>Revise</span></div></div>`;
+    } else {
+      text.innerHTML = m.html;
+      if (m.steps) {
+        const s = document.createElement("div"); s.className = "steps";
+        parts = m.steps.map(([, label, ok]) => { const d = document.createElement("div"); d.innerHTML = `<span class="ok">${ok ? "✓" : "●"}</span> ${label}`; s.append(d); return d; });
+        text.append(s);
+      }
+    }
+    const typing = document.createElement("div");
+    typing.className = "typing"; typing.innerHTML = "<i></i><i></i><i></i>";
+    text.parentElement.append(typing);
+    feedEl.append(el);
+    return { el, text, parts, typing };
+  });
+  built = true;
+}
+
+function show(el, o) { el.style.opacity = o; el.style.display = o <= 0.001 ? "none" : ""; }
+
+function render(t) {
+  if (!built) build();
+  // Title 0-4.2, scene 4.2-71, end 71+
+  show(document.getElementById("title"), 1 - fade(t, 3.6, .6));
+  const lines = ["your new product designer.", "listening to every customer call.", "keeping your design system honest."];
+  document.getElementById("titleLine").textContent = lines[Math.min(2, Math.floor(t / 1.25))];
+  show(document.getElementById("scene"), fade(t, 4.0, .6) * (1 - fade(t, 70.4, .6)));
+  show(document.getElementById("end"), fade(t, 70.8, .7));
+
+  const chapters = [[4.0, "He joins your channel"], [9.5, "He reads what your team already said"], [24.5, "He sketches on your real screen"], [36.0, "He knows what was decided, and why"], [45.0, "He builds two options and checks them"], [63.0, "You decide what ships"]];
+  let ci = 0; chapters.forEach(([at], i) => { if (t >= at) ci = i; });
+  document.getElementById("chapNum").textContent = ci + 1;
+  document.getElementById("chapText").textContent = chapters[ci][1];
+  document.getElementById("chapter").style.opacity = clamp((t - chapters[ci][0]) / .4);
+
+  feed.forEach((m, i) => {
+    const n = nodes[i];
+    const start = m.t - (m.sys ? 0 : .9);
+    show(n.el, fade(t, start, .25));
+    n.el.style.transform = `translateY(${(1 - fade(t, start, .35)) * 14}px)`;
+    if (!n.text) return;
+    const typing = t >= start && t < m.t;
+    n.typing.style.display = typing ? "" : "none";
+    n.text.style.display = t >= m.t ? "" : "none";
+    n.typing.querySelectorAll("i").forEach((d, k) => { d.style.opacity = .35 + .65 * Math.abs(Math.sin((t * 4) + k * .7)); });
+    if (m.blocks) n.parts.forEach((p, k) => show(p, fade(t, m.t + k * m.every, .35)));
+    if (m.steps) n.parts.forEach((p, k) => show(p, fade(t, m.steps[k][0], .3)));
+  });
+
+  // Keep the newest message in view, easing toward the bottom.
+  const vp = feedEl.parentElement.clientHeight, h = feedEl.scrollHeight;
+  const target = Math.max(0, h - vp);
+  scrollNow += (target - scrollNow) * .18;
+  feedEl.style.transform = `translateY(${-scrollNow}px)`;
+
+  // Stage
+  const before = document.getElementById("shotBefore");
+  show(before, fade(t, 13.0, .6) * (1 - fade(t, 32.0, .1)));
+  before.style.top = `${120 - 120 * ease((t - 13) / .8)}px`;
+  show(document.getElementById("n1"), fade(t, 15.5, .4) * (1 - fade(t, 30.0, .4)));
+  show(document.getElementById("n2"), fade(t, 19.4, .4) * (1 - fade(t, 30.0, .4)));
+  const sketch = document.getElementById("shotSketch");
+  // Wipe from today to the sketch, left to right, with an amber edge.
+  const wipe = ease((t - 30.4) / 1.4);
+  show(sketch, (t >= 30.4 ? 1 : 0) * (1 - fade(t, 49.0, .6)));
+  sketch.style.clipPath = `inset(0 ${(1 - wipe) * 100}% 0 0)`;
+  sketch.style.boxShadow = wipe > 0 && wipe < 1 ? "4px 0 0 var(--mark)" : "";
+  const a = document.getElementById("shotA"), b = document.getElementById("shotB");
+  show(a, fade(t, 49.4, .6) * (1 - fade(t, 56.0, .1)));
+  show(b, fade(t, 55.0, .6) * (1 - fade(t, 70, .4)));
+  a.style.top = `${40 * (1 - ease((t - 49.4) / .8))}px`;
+  b.style.top = `${40 * (1 - ease((t - 55.0) / .8))}px`;
+
+  // Cursor to "Approve B" and a click
+  const cur = document.getElementById("cursor"), btn = document.getElementById("approveB");
+  if (btn && t >= 61.5 && t < 70) {
+    const r = btn.getBoundingClientRect();
+    const k = ease((t - 61.5) / 1.6);
+    const x = 1500 + (r.left + r.width / 2 - 1500) * k, y = 1000 + (r.top + r.height / 2 - 1000) * k;
+    cur.style.display = ""; cur.style.left = `${x}px`; cur.style.top = `${y}px`;
+    cur.style.transform = `scale(${t > 63.6 && t < 63.9 ? .85 : 1})`;
+    btn.style.filter = t > 63.6 && t < 64.2 ? "brightness(1.25)" : "";
+  } else cur.style.display = "none";
+
+  document.getElementById("clock").textContent = t < 25 ? "10:43" : t < 45 ? "10:46" : "10:51";
+}
+window.render = render;
+window.DURATION = 76;
+render(0);
+</script>
+</body>
+</html>
