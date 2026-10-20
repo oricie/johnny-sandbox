@@ -14,6 +14,7 @@ import { client, MODEL, structured, track } from "../llm";
 export interface UrlReviewOptions {
   url: string;
   goal?: string; // e.g. "buy a t-shirt"; otherwise he works out the main flow himself
+  context?: string; // what users say about it in public, to check on the product as he walks
   outDir: string;
   maxSteps?: number;
   onStep?: (line: string) => void;
@@ -78,6 +79,30 @@ const REVIEW_SCHEMA = {
 
 const launch = launchBrowser;
 
+// A static copy of the screen for sketching: styles the app injected at runtime are written out, and
+// canvases become images of what they show (apps like Excalidraw draw on canvas and style with JS).
+export function snapshotHtml(page: Page): Promise<string> {
+  return page.evaluate((base) => {
+      const css = Array.from(document.styleSheets).map((sh) => { try { return Array.from(sh.cssRules).map((r) => r.cssText).join("\n"); } catch { return ""; } }).join("\n");
+      const clone = document.documentElement.cloneNode(true) as HTMLElement;
+      const live = Array.from(document.querySelectorAll("canvas"));
+      Array.from(clone.querySelectorAll("canvas")).forEach((c, i) => {
+        const src = live[i];
+        if (!src) return;
+        const img = document.createElement("img");
+        try { img.src = src.toDataURL(); } catch { return; }
+        const r = src.getBoundingClientRect();
+        img.setAttribute("style", `${src.getAttribute("style") ?? ""};width:${r.width}px;height:${r.height}px`);
+        img.className = src.className;
+        c.replaceWith(img);
+      });
+      clone.querySelectorAll("script, link[rel=stylesheet], style").forEach((n) => n.remove());
+      const head = clone.querySelector("head")!;
+      head.insertAdjacentHTML("afterbegin", `<base href="${base}"><style>${css.replace(/<\/style/gi, "<\\/style")}</style>`);
+      return "<!doctype html>" + clone.outerHTML;
+  }, page.url());
+}
+
 // Numbers the visible interactive elements, tags them with data-johnny-n, and returns where they are.
 async function markElements(page: Page): Promise<Marked[]> {
   return page.evaluate(() => {
@@ -140,7 +165,7 @@ export async function reviewUrl(opts: UrlReviewOptions) {
     await page.screenshot({ path: shot });
     await withBadges(page, elements, marked);
     const snapshot = path.join(shots, `look-${id}.html`);
-    const html = (await page.content()).replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<head([^>]*)>/i, `<head$1><base href="${page.url()}">`);
+    const html = await snapshotHtml(page);
     fs.writeFileSync(snapshot, html);
     const scrollY: number = await page.evaluate(() => window.scrollY);
     looks.push({ id, url: page.url(), title: await page.title(), shot, marked, snapshot, elements, scrollY });
@@ -182,6 +207,31 @@ export async function reviewUrl(opts: UrlReviewOptions) {
         await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
         return look();
       }
+      case "click_at": {
+        await page.mouse.click(Number(input.x), Number(input.y));
+        await page.waitForTimeout(500);
+        return look();
+      }
+      case "drag": {
+        await page.mouse.move(Number(input.x1), Number(input.y1));
+        await page.mouse.down();
+        await page.mouse.move(Number(input.x2), Number(input.y2), { steps: 12 });
+        await page.mouse.up();
+        await page.waitForTimeout(400);
+        return look();
+      }
+      case "keys": {
+        // Typing on a canvas or pressing shortcuts, in the order given. Same rule as fields: nothing personal.
+        const steps = (input.sequence as { press?: string; text?: string }[] | undefined) ?? [];
+        if (steps.some((x) => /@/.test(x.text ?? ""))) return "Blocked: don't enter personal details.";
+        for (const x of steps) {
+          if (x.press) await page.keyboard.press(x.press);
+          if (x.text) await page.keyboard.type(x.text, { delay: 20 });
+          await page.waitForTimeout(150);
+        }
+        await page.waitForTimeout(300);
+        return look();
+      }
       case "back": {
         await page.goBack({ waitUntil: "domcontentloaded" }).catch(() => {});
         return look();
@@ -197,6 +247,9 @@ export async function reviewUrl(opts: UrlReviewOptions) {
     { name: "scroll", description: "Scroll the page down or up by about two thirds of a screen.", input_schema: { type: "object", additionalProperties: false, required: ["direction"], properties: { direction: { type: "string", enum: ["down", "up"] } } } },
     { name: "go_to", description: "Open a URL on the same site.", input_schema: { type: "object", additionalProperties: false, required: ["url"], properties: { url: { type: "string" } } } },
     { name: "back", description: "Browser back.", input_schema: { type: "object", additionalProperties: false, properties: {}, required: [] } },
+    { name: "click_at", description: "Click at a point (x, y in screenshot pixels), e.g. on a canvas.", input_schema: { type: "object", additionalProperties: false, required: ["x", "y"], properties: { x: { type: "number" }, y: { type: "number" } } } },
+    { name: "drag", description: "Drag from one point to another (screenshot pixels), e.g. to draw a shape or move something on a canvas.", input_schema: { type: "object", additionalProperties: false, required: ["x1", "y1", "x2", "y2"], properties: { x1: { type: "number" }, y1: { type: "number" }, x2: { type: "number" }, y2: { type: "number" } } } },
+    { name: "keys", description: "Press keys and type text, in exactly the order listed, e.g. [{press:'Enter'},{text:'Database'},{press:'Escape'}]. For text on a canvas and for shortcuts.", input_schema: { type: "object", additionalProperties: false, required: ["sequence"], properties: { sequence: { type: "array", items: { type: "object", additionalProperties: false, properties: { press: { type: "string", description: "One key or chord, e.g. 'Enter', 'r', 'Control+z'" }, text: { type: "string" } } } } } } },
     { name: "submit_review", description: "Submit your review when you've walked the flow. Call it once.", input_schema: REVIEW_SCHEMA, strict: true },
   ];
 
@@ -207,18 +260,22 @@ export async function reviewUrl(opts: UrlReviewOptions) {
 You've been given only a link to a product. Walk its main flow as a first-time user would
 ${opts.goal ? `(goal: ${opts.goal})` : "(work out from the first screen what the core thing a user comes to do is)"}, then review it as its designer.
 
-Walking:
-- Use look, click, type, scroll, go_to and back. Each look returns a screenshot with numbered elements.
+${opts.context ? `What users say about it in public (check these on the product as you walk; cite them as "feedback:N"):\n${opts.context}\n\n` : ""}Walking:
+- Use look, click, type, scroll, go_to and back; on a canvas, click_at, drag and keys. Each look returns a
+  screenshot with numbered elements.
 - Go as far as a real user would, but stop before anything that pays, books, signs up, subscribes or
   submits personal details; those clicks are blocked anyway. Reaching the step before is enough.
 - Look closely at each screen: what's first, what's unclear, what's missing, what the user has to guess.
   Notice feedback after actions (did adding, filtering or choosing visibly do something?), empty and
   loading states, and consistency between screens. Scroll where content continues.
 - You have about ${maxSteps} steps. Spend them on the main flow, not on footers or legal pages.
+- Before you report something surprising (a key that does the wrong thing, something that disappears),
+  reproduce it once more in the simplest clean way. If it doesn't happen again, it was probably how you
+  drove the browser, not the product: leave it out.
 
 Reviewing:
 - Findings are problems from the user's side, ranked by how much they hurt the core flow. Only what
-  you saw: cite "look:N" or "look:N#element". No invented metrics or user quotes; impact is your
+  you saw: cite "look:N" or "look:N#element"${opts.context ? ' or "feedback:N"' : ""}. No invented metrics or user quotes; impact is your
   judgement, so say why. A product with no problems worth fixing is a fine answer: say so.
 - Choose one to redesign now, point at the part of the page to sketch (an element on that look and how
   many parent levels up make the whole component or section), and propose two genuinely different
