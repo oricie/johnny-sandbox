@@ -1,8 +1,8 @@
 export function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <header style={{ marginBottom: 16 }}>
-      <h1 style={{ margin: 0, fontSize: 22 }}>{title}</h1>
-      {subtitle && <p style={{ margin: "4px 0 0", color: "#b8bcc4" }}>{subtitle}</p>}
+    <header className="page-header">
+      <h1 className="page-title">{title}</h1>
+      {subtitle && <p className="page-subtitle">{subtitle}</p>}
     </header>
   );
 }
